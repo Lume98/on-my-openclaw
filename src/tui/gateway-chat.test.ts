@@ -91,7 +91,7 @@ describe("resolveGatewayConnection", () => {
     resolveGatewayPort.mockClear();
     pickPrimaryTailnetIPv4.mockClear();
     pickPrimaryLanIPv4.mockClear();
-    resolveGatewayPort.mockReturnValue(18789);
+    resolveGatewayPort.mockReturnValue(8789);
     pickPrimaryTailnetIPv4.mockReturnValue(undefined);
     pickPrimaryLanIPv4.mockReturnValue(undefined);
     delete process.env.OPENCLAW_GATEWAY_TOKEN;

@@ -103,7 +103,7 @@ describe("scanStatus", () => {
       sessions: { count: 0, paths: [], defaults: {}, recent: [] },
     });
     mocks.buildGatewayConnectionDetails.mockReturnValue({
-      url: "ws://127.0.0.1:18789",
+      url: "ws://127.0.0.1:8789",
       urlSource: "default",
     });
     mocks.resolveGatewayProbeAuthResolution.mockReturnValue({
@@ -112,7 +112,7 @@ describe("scanStatus", () => {
     });
     mocks.probeGateway.mockResolvedValue({
       ok: false,
-      url: "ws://127.0.0.1:18789",
+      url: "ws://127.0.0.1:8789",
       connectLatencyMs: null,
       error: "timeout",
       close: null,

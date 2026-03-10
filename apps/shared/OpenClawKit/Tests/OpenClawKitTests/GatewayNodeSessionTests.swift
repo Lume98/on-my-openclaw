@@ -181,7 +181,7 @@ struct GatewayNodeSessionTests {
     @Test
     func normalizeCanvasHostUrlBackfillsGatewayHostForLoopbackCanvas() {
         let normalized = canonicalizeCanvasHostUrl(
-            raw: "http://127.0.0.1:18789/__openclaw__/cap/token",
+            raw: "http://127.0.0.1:8789/__openclaw__/cap/token",
             activeURL: URL(string: "wss://gateway.example.com:7443")!)
 
         #expect(normalized == "https://gateway.example.com:7443/__openclaw__/cap/token")

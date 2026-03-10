@@ -28,8 +28,8 @@ vi.mock("../commands/onboard-helpers.js", () => ({
   openUrl: vi.fn(async () => false),
   probeGatewayReachable,
   resolveControlUiLinks: vi.fn(() => ({
-    httpUrl: "http://127.0.0.1:18789",
-    wsUrl: "ws://127.0.0.1:18789",
+    httpUrl: "http://127.0.0.1:8789",
+    wsUrl: "ws://127.0.0.1:8789",
   })),
   waitForGatewayReachable: vi.fn(async () => {}),
 }));
@@ -165,7 +165,7 @@ describe("finalizeOnboardingWizard", () => {
         },
         workspaceDir: "/tmp",
         settings: {
-          port: 18789,
+          port: 8789,
           bind: "loopback",
           authMode: "password",
           gatewayToken: undefined,
@@ -185,13 +185,13 @@ describe("finalizeOnboardingWizard", () => {
 
     expect(probeGatewayReachable).toHaveBeenCalledWith(
       expect.objectContaining({
-        url: "ws://127.0.0.1:18789",
+        url: "ws://127.0.0.1:8789",
         password: "resolved-gateway-password", // pragma: allowlist secret
       }),
     );
     expect(runTui).toHaveBeenCalledWith(
       expect.objectContaining({
-        url: "ws://127.0.0.1:18789",
+        url: "ws://127.0.0.1:8789",
         password: "resolved-gateway-password", // pragma: allowlist secret
       }),
     );
@@ -228,7 +228,7 @@ describe("finalizeOnboardingWizard", () => {
       },
       workspaceDir: "/tmp",
       settings: {
-        port: 18789,
+        port: 8789,
         bind: "loopback",
         authMode: "token",
         gatewayToken: "session-token",

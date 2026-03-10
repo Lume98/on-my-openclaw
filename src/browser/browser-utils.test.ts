@@ -84,14 +84,14 @@ describe("browser CSRF loopback mutation guard", () => {
     expect(
       shouldRejectBrowserMutation({
         method: "POST",
-        origin: "http://127.0.0.1:18789",
+        origin: "http://127.0.0.1:8789",
       }),
     ).toBe(false);
 
     expect(
       shouldRejectBrowserMutation({
         method: "POST",
-        origin: "http://localhost:18789",
+        origin: "http://localhost:8789",
       }),
     ).toBe(false);
   });

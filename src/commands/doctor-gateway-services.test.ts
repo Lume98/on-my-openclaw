@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => ({
   auditGatewayServiceConfig: vi.fn(),
   buildGatewayInstallPlan: vi.fn(),
   resolveGatewayAuthTokenForService: vi.fn(),
-  resolveGatewayPort: vi.fn(() => 18789),
+  resolveGatewayPort: vi.fn(() => 8789),
   resolveIsNixMode: vi.fn(() => false),
   findExtraGatewayServices: vi.fn().mockResolvedValue([]),
   renderGatewayServiceCleanupHints: vi.fn().mockReturnValue([]),
@@ -106,7 +106,7 @@ const gatewayProgramArguments = [
   "/usr/local/bin/openclaw",
   "gateway",
   "--port",
-  "18789",
+  "8789",
 ];
 
 function setupGatewayTokenRepairScenario() {

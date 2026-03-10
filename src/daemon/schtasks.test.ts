@@ -209,7 +209,7 @@ describe("readScheduledTaskCommand", () => {
           "rem OpenClaw Gateway",
           "cd /d C:\\Projects\\openclaw",
           "set NODE_ENV=production",
-          "set OPENCLAW_PORT=18789",
+          "set OPENCLAW_PORT=8789",
           "node gateway.js --verbose",
         ],
       },
@@ -220,7 +220,7 @@ describe("readScheduledTaskCommand", () => {
           workingDirectory: "C:\\Projects\\openclaw",
           environment: {
             NODE_ENV: "production",
-            OPENCLAW_PORT: "18789",
+            OPENCLAW_PORT: "8789",
           },
         });
       },
@@ -232,7 +232,7 @@ describe("readScheduledTaskCommand", () => {
       {
         scriptLines: [
           "@echo off",
-          '"C:\\Program Files\\nodejs\\node.exe" C:\\Users\\test\\AppData\\Roaming\\npm\\node_modules\\openclaw\\dist\\index.js gateway --port 18789',
+          '"C:\\Program Files\\nodejs\\node.exe" C:\\Users\\test\\AppData\\Roaming\\npm\\node_modules\\openclaw\\dist\\index.js gateway --port 8789',
         ],
       },
       async (env) => {
@@ -243,7 +243,7 @@ describe("readScheduledTaskCommand", () => {
             "C:\\Users\\test\\AppData\\Roaming\\npm\\node_modules\\openclaw\\dist\\index.js",
             "gateway",
             "--port",
-            "18789",
+            "8789",
           ],
         });
       },
@@ -255,7 +255,7 @@ describe("readScheduledTaskCommand", () => {
       {
         scriptLines: [
           "@echo off",
-          '"\\\\fileserver\\OpenClaw Share\\node.exe" "\\\\fileserver\\OpenClaw Share\\dist\\index.js" gateway --port 18789',
+          '"\\\\fileserver\\OpenClaw Share\\node.exe" "\\\\fileserver\\OpenClaw Share\\dist\\index.js" gateway --port 8789',
         ],
       },
       async (env) => {
@@ -266,7 +266,7 @@ describe("readScheduledTaskCommand", () => {
             "\\\\fileserver\\OpenClaw Share\\dist\\index.js",
             "gateway",
             "--port",
-            "18789",
+            "8789",
           ],
         });
       },

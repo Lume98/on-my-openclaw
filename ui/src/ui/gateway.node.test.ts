@@ -111,7 +111,7 @@ describe("GatewayBrowserClient", () => {
 
   it("prefers explicit shared auth over cached device tokens", async () => {
     const client = new GatewayBrowserClient({
-      url: "ws://127.0.0.1:18789",
+      url: "ws://127.0.0.1:8789",
       token: "shared-auth-token",
     });
 
@@ -141,7 +141,7 @@ describe("GatewayBrowserClient", () => {
 
   it("uses cached device tokens only when no explicit shared auth is provided", async () => {
     const client = new GatewayBrowserClient({
-      url: "ws://127.0.0.1:18789",
+      url: "ws://127.0.0.1:8789",
     });
 
     client.start();

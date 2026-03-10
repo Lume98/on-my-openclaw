@@ -8,7 +8,7 @@ import org.junit.Test
 class GatewayConfigResolverTest {
   @Test
   fun resolveScannedSetupCodeAcceptsRawSetupCode() {
-    val setupCode = encodeSetupCode("""{"url":"wss://gateway.example:18789","token":"token-1"}""")
+    val setupCode = encodeSetupCode("""{"url":"wss://gateway.example:8789","token":"token-1"}""")
 
     val resolved = resolveScannedSetupCode(setupCode)
 
@@ -17,12 +17,12 @@ class GatewayConfigResolverTest {
 
   @Test
   fun resolveScannedSetupCodeAcceptsQrJsonPayload() {
-    val setupCode = encodeSetupCode("""{"url":"wss://gateway.example:18789","password":"pw-1"}""")
+    val setupCode = encodeSetupCode("""{"url":"wss://gateway.example:8789","password":"pw-1"}""")
     val qrJson =
       """
       {
         "setupCode": "$setupCode",
-        "gatewayUrl": "wss://gateway.example:18789",
+        "gatewayUrl": "wss://gateway.example:8789",
         "auth": "password",
         "urlSource": "gateway.remote.url"
       }

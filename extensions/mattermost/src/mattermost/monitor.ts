@@ -361,7 +361,7 @@ export async function monitorMattermostProvider(opts: MonitorMattermostOpts = {}
       // a different port.
       const envPortRaw = process.env.OPENCLAW_GATEWAY_PORT?.trim();
       const envPort = parseStrictPositiveInteger(envPortRaw);
-      const slashGatewayPort = envPort ?? cfg.gateway?.port ?? 18789;
+      const slashGatewayPort = envPort ?? cfg.gateway?.port ?? 8789;
 
       const slashCallbackUrl = resolveCallbackUrl({
         config: slashConfig,

@@ -48,7 +48,7 @@ struct OnboardingViewSmokeTests {
                 lanHost: "txt-host.local",
                 tailnetDns: "txt-host.ts.net",
                 sshPort: 22,
-                gatewayPort: 18789,
+                gatewayPort: 8789,
                 cliPath: "/tmp/openclaw",
                 stableID: UUID().uuidString,
                 debugID: UUID().uuidString,

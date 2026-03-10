@@ -127,7 +127,7 @@ function createClientWithIdentity(
     publicKeyPem: "public-key",
   };
   return new GatewayClient({
-    url: "ws://127.0.0.1:18789",
+    url: "ws://127.0.0.1:8789",
     deviceIdentity: identity,
     onClose,
   });
@@ -160,7 +160,7 @@ describe("GatewayClient security checks", () => {
   it("blocks ws:// to non-loopback addresses (CWE-319)", () => {
     const onConnectError = vi.fn();
     const client = new GatewayClient({
-      url: "ws://remote.example.com:18789",
+      url: "ws://remote.example.com:8789",
       onConnectError,
     });
 
@@ -189,7 +189,7 @@ describe("GatewayClient security checks", () => {
   it("allows ws:// to loopback addresses", () => {
     const onConnectError = vi.fn();
     const client = new GatewayClient({
-      url: "ws://127.0.0.1:18789",
+      url: "ws://127.0.0.1:8789",
       onConnectError,
     });
 
@@ -203,7 +203,7 @@ describe("GatewayClient security checks", () => {
   it("allows wss:// to any address", () => {
     const onConnectError = vi.fn();
     const client = new GatewayClient({
-      url: "wss://remote.example.com:18789",
+      url: "wss://remote.example.com:8789",
       onConnectError,
     });
 
@@ -218,7 +218,7 @@ describe("GatewayClient security checks", () => {
     process.env.OPENCLAW_ALLOW_INSECURE_PRIVATE_WS = "1";
     const onConnectError = vi.fn();
     const client = new GatewayClient({
-      url: "ws://192.168.1.100:18789",
+      url: "ws://192.168.1.100:8789",
       onConnectError,
     });
 
@@ -233,7 +233,7 @@ describe("GatewayClient security checks", () => {
     process.env.OPENCLAW_ALLOW_INSECURE_PRIVATE_WS = "1";
     const onConnectError = vi.fn();
     const client = new GatewayClient({
-      url: "ws://openclaw-gateway.ai:18789",
+      url: "ws://openclaw-gateway.ai:8789",
       onConnectError,
     });
 
@@ -333,7 +333,7 @@ describe("GatewayClient close handling", () => {
       publicKeyPem: "public-key",
     };
     const client = new GatewayClient({
-      url: "ws://127.0.0.1:18789",
+      url: "ws://127.0.0.1:8789",
       deviceIdentity: identity,
       token: "shared-token",
       onClose,
@@ -386,7 +386,7 @@ describe("GatewayClient connect auth payload", () => {
   it("uses explicit shared token and does not inject stored device token", () => {
     loadDeviceAuthTokenMock.mockReturnValue({ token: "stored-device-token" });
     const client = new GatewayClient({
-      url: "ws://127.0.0.1:18789",
+      url: "ws://127.0.0.1:8789",
       token: "shared-token",
     });
 
@@ -405,7 +405,7 @@ describe("GatewayClient connect auth payload", () => {
   it("uses explicit shared password and does not inject stored device token", () => {
     loadDeviceAuthTokenMock.mockReturnValue({ token: "stored-device-token" });
     const client = new GatewayClient({
-      url: "ws://127.0.0.1:18789",
+      url: "ws://127.0.0.1:8789",
       password: "shared-password", // pragma: allowlist secret
     });
 
@@ -425,7 +425,7 @@ describe("GatewayClient connect auth payload", () => {
   it("uses stored device token when shared token is not provided", () => {
     loadDeviceAuthTokenMock.mockReturnValue({ token: "stored-device-token" });
     const client = new GatewayClient({
-      url: "ws://127.0.0.1:18789",
+      url: "ws://127.0.0.1:8789",
     });
 
     client.start();
@@ -443,7 +443,7 @@ describe("GatewayClient connect auth payload", () => {
   it("prefers explicit deviceToken over stored device token", () => {
     loadDeviceAuthTokenMock.mockReturnValue({ token: "stored-device-token" });
     const client = new GatewayClient({
-      url: "ws://127.0.0.1:18789",
+      url: "ws://127.0.0.1:8789",
       deviceToken: "explicit-device-token",
     });
 

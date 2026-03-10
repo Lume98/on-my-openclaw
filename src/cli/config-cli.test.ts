@@ -131,7 +131,7 @@ describe("config cli", () => {
         agents: {
           list: [{ id: "main" }, { id: "oracle", workspace: "~/oracle-workspace" }],
         },
-        gateway: { port: 18789 },
+        gateway: { port: 8789 },
         tools: { allow: ["group:fs"] },
         logging: { level: "debug" },
       };
@@ -145,7 +145,7 @@ describe("config cli", () => {
       expect(mockWriteConfigFile).toHaveBeenCalledTimes(1);
       const written = mockWriteConfigFile.mock.calls[0]?.[0];
       expect(written.gateway?.auth).toEqual({ mode: "token" });
-      expect(written.gateway?.port).toBe(18789);
+      expect(written.gateway?.port).toBe(8789);
       expect(written.agents).toEqual(resolved.agents);
       expect(written.tools).toEqual(resolved.tools);
       expect(written.logging).toEqual(resolved.logging);
@@ -154,7 +154,7 @@ describe("config cli", () => {
 
     it("does not inject runtime defaults into the written config", async () => {
       const resolved: OpenClawConfig = {
-        gateway: { port: 18789 },
+        gateway: { port: 8789 },
       };
       const runtimeMerged = {
         ...resolved,
@@ -179,13 +179,13 @@ describe("config cli", () => {
       expect(written).not.toHaveProperty("agents.defaults.maxTokens");
       expect(written).not.toHaveProperty("messages.ackReaction");
       expect(written).not.toHaveProperty("sessions.persistence");
-      expect(written.gateway?.port).toBe(18789);
+      expect(written.gateway?.port).toBe(8789);
       expect(written.gateway?.auth).toEqual({ mode: "token" });
     });
 
     it("auto-seeds a valid Ollama provider when setting only models.providers.ollama.apiKey", async () => {
       const resolved: OpenClawConfig = {
-        gateway: { port: 18789 },
+        gateway: { port: 8789 },
       };
       setSnapshot(resolved, resolved);
 
@@ -222,7 +222,7 @@ describe("config cli", () => {
   describe("config validate", () => {
     it("prints success and exits 0 when config is valid", async () => {
       const resolved: OpenClawConfig = {
-        gateway: { port: 18789 },
+        gateway: { port: 8789 },
       };
       setSnapshot(resolved, resolved);
 
@@ -317,7 +317,7 @@ describe("config cli", () => {
 
   describe("config set parsing flags", () => {
     it("falls back to raw string when parsing fails and strict mode is off", async () => {
-      const resolved: OpenClawConfig = { gateway: { port: 18789 } };
+      const resolved: OpenClawConfig = { gateway: { port: 8789 } };
       setSnapshot(resolved, resolved);
 
       await runConfigCommand(["config", "set", "gateway.auth.mode", "{bad"]);
@@ -392,7 +392,7 @@ describe("config cli", () => {
     it("preserves existing config keys when unsetting a value", async () => {
       const resolved: OpenClawConfig = {
         agents: { list: [{ id: "main" }] },
-        gateway: { port: 18789 },
+        gateway: { port: 8789 },
         tools: {
           profile: "coding",
           alsoAllow: ["agents_list"],
@@ -422,7 +422,7 @@ describe("config cli", () => {
 
   describe("config file", () => {
     it("prints the active config file path", async () => {
-      const resolved: OpenClawConfig = { gateway: { port: 18789 } };
+      const resolved: OpenClawConfig = { gateway: { port: 8789 } };
       setSnapshot(resolved, resolved);
 
       await runConfigCommand(["config", "file"]);
@@ -432,7 +432,7 @@ describe("config cli", () => {
     });
 
     it("handles config file path with home directory", async () => {
-      const resolved: OpenClawConfig = { gateway: { port: 18789 } };
+      const resolved: OpenClawConfig = { gateway: { port: 8789 } };
       const snapshot = buildSnapshot({ resolved, config: resolved });
       snapshot.path = "/home/user/.openclaw/openclaw.json";
       mockReadConfigFileSnapshot.mockResolvedValueOnce(snapshot);

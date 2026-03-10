@@ -119,7 +119,7 @@ type ProbeGatewayResult = {
 function mockProbeGatewayResult(overrides: Partial<ProbeGatewayResult>) {
   mocks.probeGateway.mockResolvedValueOnce({
     ok: false,
-    url: "ws://127.0.0.1:18789",
+    url: "ws://127.0.0.1:8789",
     connectLatencyMs: null,
     error: "timeout",
     close: null,
@@ -158,7 +158,7 @@ const mocks = vi.hoisted(() => ({
   logWebSelfId: vi.fn(),
   probeGateway: vi.fn().mockResolvedValue({
     ok: false,
-    url: "ws://127.0.0.1:18789",
+    url: "ws://127.0.0.1:8789",
     connectLatencyMs: null,
     error: "timeout",
     close: null,

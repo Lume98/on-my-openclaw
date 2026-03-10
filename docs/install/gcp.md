@@ -219,7 +219,7 @@ Create `.env` in the repository root.
 OPENCLAW_IMAGE=openclaw:latest
 OPENCLAW_GATEWAY_TOKEN=change-me-now
 OPENCLAW_GATEWAY_BIND=lan
-OPENCLAW_GATEWAY_PORT=18789
+OPENCLAW_GATEWAY_PORT=8789
 
 OPENCLAW_CONFIG_DIR=/home/$USER/.openclaw
 OPENCLAW_WORKSPACE_DIR=/home/$USER/.openclaw/workspace
@@ -266,7 +266,7 @@ services:
     ports:
       # Recommended: keep the Gateway loopback-only on the VM; access via SSH tunnel.
       # To expose it publicly, remove the `127.0.0.1:` prefix and firewall accordingly.
-      - "127.0.0.1:${OPENCLAW_GATEWAY_PORT}:18789"
+      - "127.0.0.1:${OPENCLAW_GATEWAY_PORT}:8789"
     command:
       [
         "node",
@@ -356,10 +356,10 @@ If build fails with `Killed` / `exit code 137` during `pnpm install --frozen-loc
 When binding to LAN (`OPENCLAW_GATEWAY_BIND=lan`), configure a trusted browser origin before continuing:
 
 ```bash
-docker compose run --rm openclaw-cli config set gateway.controlUi.allowedOrigins '["http://127.0.0.1:18789"]' --strict-json
+docker compose run --rm openclaw-cli config set gateway.controlUi.allowedOrigins '["http://127.0.0.1:8789"]' --strict-json
 ```
 
-If you changed the gateway port, replace `18789` with your configured port.
+If you changed the gateway port, replace `8789` with your configured port.
 
 Verify binaries:
 
@@ -388,7 +388,7 @@ docker compose logs -f openclaw-gateway
 Success:
 
 ```
-[gateway] listening on ws://0.0.0.0:18789
+[gateway] listening on ws://0.0.0.0:8789
 ```
 
 ---
@@ -398,12 +398,12 @@ Success:
 Create an SSH tunnel to forward the Gateway port:
 
 ```bash
-gcloud compute ssh openclaw-gateway --zone=us-central1-a -- -L 18789:127.0.0.1:18789
+gcloud compute ssh openclaw-gateway --zone=us-central1-a -- -L 8789:127.0.0.1:8789
 ```
 
 Open in your browser:
 
-`http://127.0.0.1:18789/`
+`http://127.0.0.1:8789/`
 
 Fetch a fresh tokenized dashboard link:
 

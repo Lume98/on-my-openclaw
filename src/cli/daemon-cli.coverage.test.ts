@@ -5,7 +5,7 @@ import { createCliRuntimeCapture } from "./test-runtime-capture.js";
 
 const callGateway = vi.fn(async (..._args: unknown[]) => ({ ok: true }));
 const resolveGatewayProgramArguments = vi.fn(async (_opts?: unknown) => ({
-  programArguments: ["/bin/node", "cli", "gateway", "--port", "18789"],
+  programArguments: ["/bin/node", "cli", "gateway", "--port", "8789"],
 }));
 const serviceInstall = vi.fn().mockResolvedValue(undefined);
 const serviceUninstall = vi.fn().mockResolvedValue(undefined);
@@ -74,7 +74,7 @@ vi.mock("../daemon/inspect.js", () => ({
 
 vi.mock("../infra/ports.js", () => ({
   inspectPortUsage: (port: number) => inspectPortUsage(port),
-  formatPortDiagnostics: () => ["Port 18789 is already in use."],
+  formatPortDiagnostics: () => ["Port 8789 is already in use."],
 }));
 
 vi.mock("../runtime.js", () => ({
@@ -208,7 +208,7 @@ describe("daemon-cli coverage", () => {
       "daemon",
       "install",
       "--port",
-      "18789",
+      "8789",
       "--token",
       "test-token",
       "--json",

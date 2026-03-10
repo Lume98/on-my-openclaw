@@ -52,8 +52,8 @@ describe("ports helpers", () => {
     };
 
     await handlePortError(
-      new PortInUseError(18789, "node dist/index.js openclaw gateway"),
-      18789,
+      new PortInUseError(8789, "node dist/index.js openclaw gateway"),
+      8789,
       "gateway start",
       runtime,
     ).catch(() => {});
@@ -64,27 +64,27 @@ describe("ports helpers", () => {
 
   it("classifies ssh and gateway listeners", () => {
     expect(
-      classifyPortListener({ commandLine: "ssh -N -L 18789:127.0.0.1:18789 user@host" }, 18789),
+      classifyPortListener({ commandLine: "ssh -N -L 8789:127.0.0.1:8789 user@host" }, 8789),
     ).toBe("ssh");
     expect(
       classifyPortListener(
         {
           commandLine: "node /Users/me/Projects/openclaw/dist/entry.js gateway",
         },
-        18789,
+        8789,
       ),
     ).toBe("gateway");
   });
 
   it("formats port diagnostics with hints", () => {
     const diagnostics = {
-      port: 18789,
+      port: 8789,
       status: "busy" as const,
-      listeners: [{ pid: 123, commandLine: "ssh -N -L 18789:127.0.0.1:18789" }],
-      hints: buildPortHints([{ pid: 123, commandLine: "ssh -N -L 18789:127.0.0.1:18789" }], 18789),
+      listeners: [{ pid: 123, commandLine: "ssh -N -L 8789:127.0.0.1:8789" }],
+      hints: buildPortHints([{ pid: 123, commandLine: "ssh -N -L 8789:127.0.0.1:8789" }], 8789),
     };
     const lines = formatPortDiagnostics(diagnostics);
-    expect(lines[0]).toContain("Port 18789 is already in use");
+    expect(lines[0]).toContain("Port 8789 is already in use");
     expect(lines.some((line) => line.includes("SSH tunnel"))).toBe(true);
   });
 });
@@ -135,7 +135,7 @@ describeUnix("inspectPortUsage", () => {
       if (command === "ps") {
         if (argv.includes("command=")) {
           return {
-            stdout: "node /tmp/openclaw/dist/index.js gateway --port 18789\n",
+            stdout: "node /tmp/openclaw/dist/index.js gateway --port 8789\n",
             stderr: "",
             code: 0,
           };

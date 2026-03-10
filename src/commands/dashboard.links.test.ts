@@ -53,10 +53,10 @@ function mockSnapshot(token: unknown = "abc") {
     issues: [],
     legacyIssues: [],
   });
-  resolveGatewayPortMock.mockReturnValue(18789);
+  resolveGatewayPortMock.mockReturnValue(8789);
   resolveControlUiLinksMock.mockReturnValue({
-    httpUrl: "http://127.0.0.1:18789/",
-    wsUrl: "ws://127.0.0.1:18789",
+    httpUrl: "http://127.0.0.1:8789/",
+    wsUrl: "ws://127.0.0.1:8789",
   });
   resolveSecretRefValuesMock.mockReset();
 }
@@ -84,13 +84,13 @@ describe("dashboardCommand", () => {
     await dashboardCommand(runtime);
 
     expect(resolveControlUiLinksMock).toHaveBeenCalledWith({
-      port: 18789,
+      port: 8789,
       bind: "loopback",
       customBindHost: undefined,
       basePath: undefined,
     });
-    expect(copyToClipboardMock).toHaveBeenCalledWith("http://127.0.0.1:18789/#token=abc123");
-    expect(openUrlMock).toHaveBeenCalledWith("http://127.0.0.1:18789/#token=abc123");
+    expect(copyToClipboardMock).toHaveBeenCalledWith("http://127.0.0.1:8789/#token=abc123");
+    expect(openUrlMock).toHaveBeenCalledWith("http://127.0.0.1:8789/#token=abc123");
     expect(runtime.log).toHaveBeenCalledWith(
       "Opened in your browser. Keep that tab to control OpenClaw.",
     );
@@ -137,7 +137,7 @@ describe("dashboardCommand", () => {
 
     await dashboardCommand(runtime);
 
-    expect(copyToClipboardMock).toHaveBeenCalledWith("http://127.0.0.1:18789/");
+    expect(copyToClipboardMock).toHaveBeenCalledWith("http://127.0.0.1:8789/");
     expect(runtime.log).toHaveBeenCalledWith(
       expect.stringContaining("Token auto-auth unavailable"),
     );
@@ -163,8 +163,8 @@ describe("dashboardCommand", () => {
 
     await dashboardCommand(runtime);
 
-    expect(copyToClipboardMock).toHaveBeenCalledWith("http://127.0.0.1:18789/");
-    expect(openUrlMock).toHaveBeenCalledWith("http://127.0.0.1:18789/");
+    expect(copyToClipboardMock).toHaveBeenCalledWith("http://127.0.0.1:8789/");
+    expect(openUrlMock).toHaveBeenCalledWith("http://127.0.0.1:8789/");
     expect(runtime.log).toHaveBeenCalledWith(
       expect.stringContaining("Token auto-auth is disabled for SecretRef-managed"),
     );
@@ -184,8 +184,8 @@ describe("dashboardCommand", () => {
 
     await dashboardCommand(runtime);
 
-    expect(copyToClipboardMock).toHaveBeenCalledWith("http://127.0.0.1:18789/");
-    expect(openUrlMock).toHaveBeenCalledWith("http://127.0.0.1:18789/");
+    expect(copyToClipboardMock).toHaveBeenCalledWith("http://127.0.0.1:8789/");
+    expect(openUrlMock).toHaveBeenCalledWith("http://127.0.0.1:8789/");
     expect(runtime.log).toHaveBeenCalledWith(
       expect.stringContaining("Token auto-auth is disabled for SecretRef-managed"),
     );

@@ -89,11 +89,11 @@ describe("registerOnboardCommand", () => {
   });
 
   it("parses numeric gateway port and drops invalid values", async () => {
-    await runCli(["onboard", "--gateway-port", "18789"]);
+    await runCli(["onboard", "--gateway-port", "8789"]);
     expect(onboardCommandMock).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
-        gatewayPort: 18789,
+        gatewayPort: 8789,
       }),
       runtime,
     );

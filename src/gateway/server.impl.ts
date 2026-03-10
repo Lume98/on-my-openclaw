@@ -264,7 +264,7 @@ export type GatewayServerOptions = {
 };
 
 export async function startGatewayServer(
-  port = 18789,
+  port = 8789,
   opts: GatewayServerOptions = {},
 ): Promise<GatewayServer> {
   const minimalTestGateway =

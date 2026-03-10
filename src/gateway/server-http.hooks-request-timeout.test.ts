@@ -27,7 +27,7 @@ function createRequest(params?: {
   return createGatewayRequest({
     method: "POST",
     path: params?.url ?? "/hooks/wake",
-    host: "127.0.0.1:18789",
+    host: "127.0.0.1:8789",
     authorization: params?.authorization ?? "Bearer hook-secret",
     remoteAddress: params?.remoteAddress,
   });
@@ -56,7 +56,7 @@ function createHandler(params?: {
   return createHooksRequestHandler({
     getHooksConfig: () => createHooksConfig(),
     bindHost: params?.bindHost ?? "127.0.0.1",
-    port: 18789,
+    port: 8789,
     logHooks: {
       warn: vi.fn(),
       debug: vi.fn(),

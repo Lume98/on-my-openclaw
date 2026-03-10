@@ -70,7 +70,7 @@ describe("installGatewayDaemonNonInteractive", () => {
       } as OpenClawConfig,
       opts: { installDaemon: true },
       runtime,
-      port: 18789,
+      port: 8789,
     });
 
     expect(resolveGatewayInstallToken).toHaveBeenCalledTimes(1);
@@ -92,7 +92,7 @@ describe("installGatewayDaemonNonInteractive", () => {
       nextConfig: {} as OpenClawConfig,
       opts: { installDaemon: true },
       runtime,
-      port: 18789,
+      port: 8789,
     });
 
     expect(runtime.error).toHaveBeenCalledWith(expect.stringContaining("Gateway install blocked"));

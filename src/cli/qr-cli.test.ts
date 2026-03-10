@@ -155,7 +155,7 @@ describe("registerQrCli", () => {
     await runQr(["--setup-code-only"]);
 
     const expected = encodePairingSetupCode({
-      url: "ws://gateway.local:18789",
+      url: "ws://gateway.local:8789",
       token: "tok",
     });
     expect(runtime.log).toHaveBeenCalledWith(expected);
@@ -193,7 +193,7 @@ describe("registerQrCli", () => {
     await runQr(["--setup-code-only", "--token", "override-token"]);
 
     const expected = encodePairingSetupCode({
-      url: "ws://gateway.local:18789",
+      url: "ws://gateway.local:8789",
       token: "override-token",
     });
     expect(runtime.log).toHaveBeenCalledWith(expected);
@@ -209,7 +209,7 @@ describe("registerQrCli", () => {
     await runQr(["--setup-code-only", "--token", "override-token"]);
 
     const expected = encodePairingSetupCode({
-      url: "ws://gateway.local:18789",
+      url: "ws://gateway.local:8789",
       token: "override-token",
     });
     expect(runtime.log).toHaveBeenCalledWith(expected);
@@ -226,7 +226,7 @@ describe("registerQrCli", () => {
     await runQr(["--setup-code-only"]);
 
     const expected = encodePairingSetupCode({
-      url: "ws://gateway.local:18789",
+      url: "ws://gateway.local:8789",
       password: "local-password-secret", // pragma: allowlist secret
     });
     expect(runtime.log).toHaveBeenCalledWith(expected);
@@ -244,7 +244,7 @@ describe("registerQrCli", () => {
     await runQr(["--setup-code-only"]);
 
     const expected = encodePairingSetupCode({
-      url: "ws://gateway.local:18789",
+      url: "ws://gateway.local:8789",
       password: "password-from-env", // pragma: allowlist secret
     });
     expect(runtime.log).toHaveBeenCalledWith(expected);
@@ -263,7 +263,7 @@ describe("registerQrCli", () => {
     await runQr(["--setup-code-only"]);
 
     const expected = encodePairingSetupCode({
-      url: "ws://gateway.local:18789",
+      url: "ws://gateway.local:8789",
       token: "token-123",
     });
     expect(runtime.log).toHaveBeenCalledWith(expected);
@@ -281,7 +281,7 @@ describe("registerQrCli", () => {
     await runQr(["--setup-code-only"]);
 
     const expected = encodePairingSetupCode({
-      url: "ws://gateway.local:18789",
+      url: "ws://gateway.local:8789",
       password: "inferred-password", // pragma: allowlist secret
     });
     expect(runtime.log).toHaveBeenCalledWith(expected);

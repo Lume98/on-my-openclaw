@@ -12,7 +12,7 @@ The Gateway dashboard is the browser Control UI served at `/` by default
 
 Quick open (local Gateway):
 
-- [http://127.0.0.1:18789/](http://127.0.0.1:18789/) (or [http://localhost:18789/](http://localhost:18789/))
+- [http://127.0.0.1:8789/](http://127.0.0.1:8789/) (or [http://localhost:8789/](http://localhost:8789/))
 
 Key references:
 
@@ -36,7 +36,7 @@ Prefer localhost, Tailscale Serve, or an SSH tunnel.
 
 ## Token basics (local vs remote)
 
-- **Localhost**: open `http://127.0.0.1:18789/`.
+- **Localhost**: open `http://127.0.0.1:8789/`.
 - **Token source**: `gateway.auth.token` (or `OPENCLAW_GATEWAY_TOKEN`); `openclaw dashboard` can pass it via URL fragment for one-time bootstrap, and the Control UI keeps it in sessionStorage for the current browser tab session and selected gateway URL instead of localStorage.
 - If `gateway.auth.token` is SecretRef-managed, `openclaw dashboard` prints/copies/opens a non-tokenized URL by design. This avoids exposing externally managed tokens in shell logs, clipboard history, or browser-launch arguments.
 - If `gateway.auth.token` is configured as a SecretRef and is unresolved in your current shell, `openclaw dashboard` still prints a non-tokenized URL plus actionable auth setup guidance.
@@ -44,7 +44,7 @@ Prefer localhost, Tailscale Serve, or an SSH tunnel.
 
 ## If you see “unauthorized” / 1008
 
-- Ensure the gateway is reachable (local: `openclaw status`; remote: SSH tunnel `ssh -N -L 18789:127.0.0.1:18789 user@host` then open `http://127.0.0.1:18789/`).
+- Ensure the gateway is reachable (local: `openclaw status`; remote: SSH tunnel `ssh -N -L 8789:127.0.0.1:8789 user@host` then open `http://127.0.0.1:8789/`).
 - Retrieve or supply the token from the gateway host:
   - Plaintext config: `openclaw config get gateway.auth.token`
   - SecretRef-managed config: resolve the external secret provider or export `OPENCLAW_GATEWAY_TOKEN` in this shell, then rerun `openclaw dashboard`

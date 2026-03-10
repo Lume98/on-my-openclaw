@@ -1,6 +1,6 @@
 import type { OpenClawConfig } from "openclaw/plugin-sdk/diffs";
 
-const DEFAULT_GATEWAY_PORT = 18789;
+const DEFAULT_GATEWAY_PORT = 8789;
 
 export function buildViewerUrl(params: {
   config: OpenClawConfig;

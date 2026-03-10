@@ -37,7 +37,7 @@ describe("diffs tool", () => {
     });
 
     const text = readTextContent(result, 0);
-    expect(text).toContain("http://127.0.0.1:18789/plugins/diffs/view/");
+    expect(text).toContain("http://127.0.0.1:8789/plugins/diffs/view/");
     expect((result?.details as Record<string, unknown>).viewerUrl).toBeDefined();
   });
 
@@ -395,7 +395,7 @@ function createApi(): OpenClawPluginApi {
     source: "test",
     config: {
       gateway: {
-        port: 18789,
+        port: 8789,
         bind: "loopback",
       },
     },

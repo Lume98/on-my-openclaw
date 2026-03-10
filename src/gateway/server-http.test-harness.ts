@@ -166,7 +166,7 @@ export function createHooksHandler(bindHost: string) {
   return createHooksRequestHandler({
     getHooksConfig: () => createHooksConfig(),
     bindHost,
-    port: 18789,
+    port: 8789,
     logHooks: {
       warn: vi.fn(),
       debug: vi.fn(),

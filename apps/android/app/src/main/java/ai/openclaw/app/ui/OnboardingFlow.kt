@@ -226,7 +226,7 @@ fun OnboardingFlow(viewModel: MainViewModel, modifier: Modifier = Modifier) {
   var gatewayInputMode by rememberSaveable { mutableStateOf(GatewayInputMode.SetupCode) }
   var gatewayAdvancedOpen by rememberSaveable { mutableStateOf(false) }
   var manualHost by rememberSaveable { mutableStateOf("10.0.2.2") }
-  var manualPort by rememberSaveable { mutableStateOf("18789") }
+  var manualPort by rememberSaveable { mutableStateOf("8789") }
   var manualTls by rememberSaveable { mutableStateOf(false) }
   var gatewayError by rememberSaveable { mutableStateOf<String?>(null) }
   var attemptedConnect by rememberSaveable { mutableStateOf(false) }
@@ -1054,12 +1054,12 @@ private fun GatewayStep(
           Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             QuickFillChip(label = "Android Emulator", onClick = {
               onManualHostChange("10.0.2.2")
-              onManualPortChange("18789")
+              onManualPortChange("8789")
               onManualTlsChange(false)
             })
             QuickFillChip(label = "Localhost", onClick = {
               onManualHostChange("127.0.0.1")
-              onManualPortChange("18789")
+              onManualPortChange("8789")
               onManualTlsChange(false)
             })
           }
@@ -1090,7 +1090,7 @@ private fun GatewayStep(
           OutlinedTextField(
             value = manualPort,
             onValueChange = onManualPortChange,
-            placeholder = { Text("18789", color = onboardingTextTertiary, style = onboardingBodyStyle) },
+            placeholder = { Text("8789", color = onboardingTextTertiary, style = onboardingBodyStyle) },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),

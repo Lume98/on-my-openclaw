@@ -23,7 +23,7 @@ describe("extractConfigSummary", () => {
             password: { source: "env", provider: "default", id: "OPENCLAW_GATEWAY_PASSWORD" },
           },
           remote: {
-            url: "wss://remote.example:18789",
+            url: "wss://remote.example:8789",
             token: { source: "env", provider: "default", id: "REMOTE_GATEWAY_TOKEN" },
             password: { source: "env", provider: "default", id: "REMOTE_GATEWAY_PASSWORD" },
           },
@@ -91,7 +91,7 @@ describe("resolveAuthForTarget", () => {
           {
             id: "localLoopback",
             kind: "localLoopback",
-            url: "ws://127.0.0.1:18789",
+            url: "ws://127.0.0.1:8789",
             active: true,
           },
           {},
@@ -124,7 +124,7 @@ describe("resolveAuthForTarget", () => {
           {
             id: "configRemote",
             kind: "configRemote",
-            url: "wss://remote.example:18789",
+            url: "wss://remote.example:8789",
             active: true,
           },
           {},
@@ -160,7 +160,7 @@ describe("resolveAuthForTarget", () => {
           {
             id: "configRemote",
             kind: "configRemote",
-            url: "wss://remote.example:18789",
+            url: "wss://remote.example:8789",
             active: true,
           },
           {},
@@ -187,7 +187,7 @@ describe("resolveAuthForTarget", () => {
       {
         id: "configRemote",
         kind: "configRemote",
-        url: "wss://remote.example:18789",
+        url: "wss://remote.example:8789",
         active: true,
       },
       {},
@@ -219,7 +219,7 @@ describe("resolveAuthForTarget", () => {
           {
             id: "localLoopback",
             kind: "localLoopback",
-            url: "ws://127.0.0.1:18789",
+            url: "ws://127.0.0.1:8789",
             active: true,
           },
           {},

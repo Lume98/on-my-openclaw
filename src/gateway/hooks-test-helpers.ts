@@ -28,7 +28,7 @@ export function createGatewayRequest(params: {
   host?: string;
 }): IncomingMessage {
   const headers: Record<string, string> = {
-    host: params.host ?? "localhost:18789",
+    host: params.host ?? "localhost:8789",
   };
   if (params.authorization) {
     headers.authorization = params.authorization;

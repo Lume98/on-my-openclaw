@@ -678,7 +678,7 @@ describe("DiscordExecApprovalHandler gateway auth", () => {
 
     expect(gatewayClientStarts).toHaveBeenCalledTimes(1);
     expect(gatewayClientParams[0]).toMatchObject({
-      url: "ws://127.0.0.1:18789",
+      url: "ws://127.0.0.1:8789",
       token: "shared-gateway-token",
       password: undefined,
       scopes: ["operator.approvals"],

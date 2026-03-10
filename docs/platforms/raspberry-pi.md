@@ -159,10 +159,10 @@ Since the Pi is headless, use an SSH tunnel:
 
 ```bash
 # From your laptop/desktop
-ssh -L 18789:localhost:18789 user@gateway-host
+ssh -L 8789:localhost:8789 user@gateway-host
 
 # Then open in browser
-open http://localhost:18789
+open http://localhost:8789
 ```
 
 Or use Tailscale for always-on access:

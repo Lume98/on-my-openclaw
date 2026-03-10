@@ -34,7 +34,7 @@ const waitForGatewayHealthyRestart = vi.fn();
 const terminateStaleGatewayPids = vi.fn();
 const renderGatewayPortHealthDiagnostics = vi.fn(() => ["diag: unhealthy port"]);
 const renderRestartDiagnostics = vi.fn(() => ["diag: unhealthy runtime"]);
-const resolveGatewayPort = vi.fn(() => 18789);
+const resolveGatewayPort = vi.fn(() => 8789);
 const findGatewayPidsOnPortSync = vi.fn<(port: number) => number[]>(() => []);
 const probeGateway = vi.fn<
   (opts: {
@@ -129,7 +129,7 @@ describe("runDaemonRestart health checks", () => {
     mockSpawnSync.mockReset();
 
     service.readCommand.mockResolvedValue({
-      programArguments: ["openclaw", "gateway", "--port", "18789"],
+      programArguments: ["openclaw", "gateway", "--port", "8789"],
       environment: {},
     });
 
@@ -150,7 +150,7 @@ describe("runDaemonRestart health checks", () => {
     runServiceStop.mockResolvedValue(undefined);
     waitForGatewayHealthyListener.mockResolvedValue({
       healthy: true,
-      portUsage: { port: 18789, status: "busy", listeners: [], hints: [] },
+      portUsage: { port: 8789, status: "busy", listeners: [], hints: [] },
     });
     probeGateway.mockResolvedValue({
       ok: true,
@@ -164,14 +164,14 @@ describe("runDaemonRestart health checks", () => {
       }
       const pid = Number.parseInt(match[1] ?? "", 10);
       if ([4200, 4300].includes(pid)) {
-        return ["openclaw", "gateway", "--port", "18789", ""].join("\0");
+        return ["openclaw", "gateway", "--port", "8789", ""].join("\0");
       }
       throw new Error(`unknown pid ${pid}`);
     });
     mockSpawnSync.mockReturnValue({
       error: null,
       status: 0,
-      stdout: "openclaw gateway --port 18789",
+      stdout: "openclaw gateway --port 8789",
       stderr: "",
     });
   });
@@ -185,13 +185,13 @@ describe("runDaemonRestart health checks", () => {
       healthy: false,
       staleGatewayPids: [1993],
       runtime: { status: "stopped" },
-      portUsage: { port: 18789, status: "busy", listeners: [], hints: [] },
+      portUsage: { port: 8789, status: "busy", listeners: [], hints: [] },
     };
     const healthy: RestartHealthSnapshot = {
       healthy: true,
       staleGatewayPids: [],
       runtime: { status: "running" },
-      portUsage: { port: 18789, status: "busy", listeners: [], hints: [] },
+      portUsage: { port: 8789, status: "busy", listeners: [], hints: [] },
     };
     waitForGatewayHealthyRestart.mockResolvedValueOnce(unhealthy).mockResolvedValueOnce(healthy);
     terminateStaleGatewayPids.mockResolvedValue([1993]);
@@ -209,7 +209,7 @@ describe("runDaemonRestart health checks", () => {
       healthy: false,
       staleGatewayPids: [],
       runtime: { status: "stopped" },
-      portUsage: { port: 18789, status: "free", listeners: [], hints: [] },
+      portUsage: { port: 8789, status: "free", listeners: [], hints: [] },
     };
     waitForGatewayHealthyRestart.mockResolvedValue(unhealthy);
 
@@ -229,7 +229,7 @@ describe("runDaemonRestart health checks", () => {
       error: null,
       status: 0,
       stdout:
-        'CommandLine="C:\\\\Program Files\\\\OpenClaw\\\\openclaw.exe" gateway --port 18789\r\n',
+        'CommandLine="C:\\\\Program Files\\\\OpenClaw\\\\openclaw.exe" gateway --port 8789\r\n',
       stderr: "",
     });
     runServiceStop.mockImplementation(async (params: { onNotLoaded?: () => Promise<unknown> }) => {
@@ -238,7 +238,7 @@ describe("runDaemonRestart health checks", () => {
 
     await runDaemonStop({ json: true });
 
-    expect(findGatewayPidsOnPortSync).toHaveBeenCalledWith(18789);
+    expect(findGatewayPidsOnPortSync).toHaveBeenCalledWith(8789);
     expect(killSpy).toHaveBeenCalledWith(4200, "SIGTERM");
     expect(killSpy).toHaveBeenCalledWith(4300, "SIGTERM");
   });
@@ -251,7 +251,7 @@ describe("runDaemonRestart health checks", () => {
       error: null,
       status: 0,
       stdout:
-        'CommandLine="C:\\\\Program Files\\\\OpenClaw\\\\openclaw.exe" gateway --port 18789\r\n',
+        'CommandLine="C:\\\\Program Files\\\\OpenClaw\\\\openclaw.exe" gateway --port 8789\r\n',
       stderr: "",
     });
     runServiceRestart.mockImplementation(
@@ -271,7 +271,7 @@ describe("runDaemonRestart health checks", () => {
 
     await runDaemonRestart({ json: true });
 
-    expect(findGatewayPidsOnPortSync).toHaveBeenCalledWith(18789);
+    expect(findGatewayPidsOnPortSync).toHaveBeenCalledWith(8789);
     expect(killSpy).toHaveBeenCalledWith(4200, "SIGUSR1");
     expect(probeGateway).toHaveBeenCalledTimes(1);
     expect(waitForGatewayHealthyListener).toHaveBeenCalledTimes(1);
@@ -287,7 +287,7 @@ describe("runDaemonRestart health checks", () => {
       error: null,
       status: 0,
       stdout:
-        'CommandLine="C:\\\\Program Files\\\\OpenClaw\\\\openclaw.exe" gateway --port 18789\r\n',
+        'CommandLine="C:\\\\Program Files\\\\OpenClaw\\\\openclaw.exe" gateway --port 8789\r\n',
       stderr: "",
     });
     runServiceRestart.mockImplementation(
@@ -298,7 +298,7 @@ describe("runDaemonRestart health checks", () => {
     );
 
     await expect(runDaemonRestart({ json: true })).rejects.toThrow(
-      "multiple gateway processes are listening on port 18789",
+      "multiple gateway processes are listening on port 8789",
     );
   });
 

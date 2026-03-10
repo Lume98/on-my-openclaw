@@ -257,7 +257,7 @@ describe("docker-setup.sh", () => {
     await mkdir(configDir, { recursive: true });
     await writeFile(
       join(activeSandbox.rootDir, ".env"),
-      "OPENCLAW_GATEWAY_TOKEN=dotenv-token-123\nOPENCLAW_GATEWAY_PORT=18789\n", // pragma: allowlist secret
+      "OPENCLAW_GATEWAY_TOKEN=dotenv-token-123\nOPENCLAW_GATEWAY_PORT=8789\n", // pragma: allowlist secret
     );
 
     const result = runDockerSetup(activeSandbox, {

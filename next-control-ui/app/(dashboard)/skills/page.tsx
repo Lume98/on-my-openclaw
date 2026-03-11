@@ -1,5 +1,5 @@
-import { DashboardPage } from "@/components/openclaw/dashboard-page";
+import { SkillsPanel } from "@/components/openclaw/panels";
 
 export default function SkillsPage() {
-  return <DashboardPage tabKey="skills" />;
+  return <SkillsPanel />;
 }

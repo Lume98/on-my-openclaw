@@ -1,5 +1,5 @@
-import { DashboardPage } from "@/components/openclaw/dashboard-page";
+import { SessionsPanel } from "@/components/openclaw/panels";
 
 export default function SessionsPage() {
-  return <DashboardPage tabKey="sessions" />;
+  return <SessionsPanel />;
 }

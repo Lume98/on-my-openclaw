@@ -13,12 +13,6 @@ function ThemedProviders({ children }: PropsWithChildren) {
       theme={{
         algorithm: resolvedTheme === "dark" ? theme.darkAlgorithm : theme.defaultAlgorithm,
         token: {
-          borderRadius: 18,
-          colorPrimary: "#67e8f9",
-          colorInfo: "#67e8f9",
-          colorSuccess: "#34d399",
-          colorWarning: "#f59e0b",
-          colorError: "#f87171",
           wireframe: false,
         },
       }}

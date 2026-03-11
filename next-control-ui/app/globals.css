@@ -89,8 +89,31 @@ a {
   min-width: 0;
 }
 
-.control-nav-menu {
+.control-nav-menu-wrapper {
   flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* 自定义滚动条样式 */
+.control-nav-menu-wrapper::-webkit-scrollbar {
+  width: 6px;
+}
+
+.control-nav-menu-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.control-nav-menu-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.12);
+  border-radius: 3px;
+}
+
+.control-nav-menu-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 23, 42, 0.2);
+}
+
+.control-nav-menu {
   border-inline-end: none !important;
   background: transparent !important;
 }
@@ -104,6 +127,8 @@ a {
   height: auto;
   padding: 16px 24px !important;
   backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
 }
 
 .control-header-bar {
@@ -111,6 +136,7 @@ a {
   align-items: center;
   gap: 20px;
   width: 100%;
+  min-height: 48px;
 }
 
 .control-header-main {
@@ -119,20 +145,33 @@ a {
   gap: 12px;
   min-width: 0;
   flex: 0 0 auto;
+  height: 100%;
 }
 
 .control-page-copy {
   display: grid;
   gap: 2px;
+  align-items: center;
 }
 
 .control-top-nav {
   min-width: 0;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.control-top-nav .ant-menu-horizontal {
+  display: flex;
+  align-items: center;
+  border-bottom: none !important;
 }
 
 .control-header-actions {
   justify-content: flex-end;
   flex: 0 0 auto;
+  display: flex;
+  align-items: center;
 }
 
 /* 主内容区域：占满剩余高度，内部滚动 */
@@ -284,6 +323,14 @@ html[data-theme="dark"] .chat-bubble-text {
   color: #e5e7eb;
 }
 
+html[data-theme="dark"] .control-nav-menu-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.24);
+}
+
+html[data-theme="dark"] .control-nav-menu-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.36);
+}
+
 @media (max-width: 992px) {
   .control-header {
     padding: 16px !important;
@@ -291,12 +338,21 @@ html[data-theme="dark"] .chat-bubble-text {
 
   .control-header-bar {
     flex-direction: column;
-    align-items: stretch;
+    align-items: flex-start;
     gap: 16px;
+  }
+
+  .control-header-main {
+    width: 100%;
+  }
+
+  .control-top-nav {
+    width: 100%;
   }
 
   .control-header-actions {
     justify-content: flex-start;
+    width: 100%;
   }
 
   .control-content {

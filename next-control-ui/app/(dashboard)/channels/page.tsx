@@ -1,5 +1,5 @@
-import { DashboardPage } from "@/components/openclaw/dashboard-page";
+import { ChannelsPanel } from "@/components/openclaw/panels";
 
 export default function ChannelsPage() {
-  return <DashboardPage tabKey="channels" />;
+  return <ChannelsPanel />;
 }

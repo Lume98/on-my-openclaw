@@ -1,5 +1,5 @@
-import { DashboardPage } from "@/components/openclaw/dashboard-page";
+import { CronPanel } from "@/components/openclaw/panels";
 
 export default function CronPage() {
-  return <DashboardPage tabKey="cron" />;
+  return <CronPanel />;
 }

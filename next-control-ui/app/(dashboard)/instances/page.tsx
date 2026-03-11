@@ -1,5 +1,5 @@
-import { DashboardPage } from "@/components/openclaw/dashboard-page";
+import { InstancesPanel } from "@/components/openclaw/panels";
 
 export default function InstancesPage() {
-  return <DashboardPage tabKey="instances" />;
+  return <InstancesPanel />;
 }

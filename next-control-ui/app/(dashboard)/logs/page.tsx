@@ -1,5 +1,5 @@
-import { DashboardPage } from "@/components/openclaw/dashboard-page";
+import { LogsPanel } from "@/components/openclaw/panels";
 
 export default function LogsPage() {
-  return <DashboardPage tabKey="logs" />;
+  return <LogsPanel />;
 }

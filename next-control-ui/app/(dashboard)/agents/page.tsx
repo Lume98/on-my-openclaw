@@ -1,5 +1,5 @@
-import { DashboardPage } from "@/components/openclaw/dashboard-page";
+import { AgentsPanel } from "@/components/openclaw/panels";
 
 export default function AgentsPage() {
-  return <DashboardPage tabKey="agents" />;
+  return <AgentsPanel />;
 }

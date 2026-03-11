@@ -1,5 +1,5 @@
-import { DashboardPage } from "@/components/openclaw/dashboard-page";
+import { NodesPanel } from "@/components/openclaw/panels";
 
 export default function NodesPage() {
-  return <DashboardPage tabKey="nodes" />;
+  return <NodesPanel />;
 }

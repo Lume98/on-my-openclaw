@@ -1,5 +1,5 @@
-import { DashboardPage } from "@/components/openclaw/dashboard-page";
+import { OverviewPanel } from "@/components/openclaw/panels";
 
 export default function OverviewPage() {
-  return <DashboardPage tabKey="overview" />;
+  return <OverviewPanel />;
 }

@@ -1,5 +1,5 @@
-import { DashboardPage } from "@/components/openclaw/dashboard-page";
+import { UsagePanel } from "@/components/openclaw/panels";
 
 export default function UsagePage() {
-  return <DashboardPage tabKey="usage" />;
+  return <UsagePanel />;
 }

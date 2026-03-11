@@ -1,5 +1,5 @@
-import { DashboardPage } from "@/components/openclaw/dashboard-page";
+import { DebugPanel } from "@/components/openclaw/panels";
 
 export default function DebugPage() {
-  return <DashboardPage tabKey="debug" />;
+  return <DebugPanel />;
 }

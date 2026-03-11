@@ -1,5 +1,5 @@
-import { DashboardPage } from "@/components/openclaw/dashboard-page";
+import { ConfigPanel } from "@/components/openclaw/panels";
 
 export default function ConfigPage() {
-  return <DashboardPage tabKey="config" />;
+  return <ConfigPanel />;
 }

@@ -1,13 +1,11 @@
 "use client";
 
-import { DashboardPage } from "@/components/openclaw/dashboard-page";
+import { ChatPanel } from "@/components/openclaw/panels/chat-panel";
 
-export type OpenClawAppProps = {
-  defaultTab?: "chat";
-};
+export type OpenClawAppProps = Record<string, never>;
 
-export function OpenClawApp({ defaultTab = "chat" }: OpenClawAppProps) {
-  return <DashboardPage tabKey={defaultTab} />;
+export function OpenClawApp(): React.JSX.Element {
+  return <ChatPanel />;
 }
 
 export default OpenClawApp;

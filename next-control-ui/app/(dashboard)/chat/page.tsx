@@ -1,5 +1,5 @@
-import { DashboardPage } from "@/components/openclaw/dashboard-page";
+import { ChatPanel } from "@/components/openclaw/panels";
 
 export default function ChatPage() {
-  return <DashboardPage tabKey="chat" />;
+  return <ChatPanel />;
 }

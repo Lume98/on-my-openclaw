@@ -1,0 +1,39 @@
+---
+description: 强制要求目录与文件名使用 kebab-case 格式
+alwaysApply: true
+---
+
+# 命名规范：kebab-case
+
+本项目**强制要求**所有目录名和文件名使用 **kebab-case** 格式。
+
+## 规则
+
+- **kebab-case**：全小写，单词之间用连字符 `-` 连接
+- 适用于：自定义组件、hooks、工具函数、类型定义等所有新增文件
+
+## 示例
+
+```text
+✅ open-claw-app.tsx
+✅ use-gateway.ts
+✅ use-chat.ts
+✅ use-app-state.ts
+✅ gateway-browser-client.ts
+
+❌ OpenClawApp.tsx    (PascalCase)
+❌ useGateway.ts      (camelCase)
+❌ use_chat.ts        (snake_case)
+```
+
+## 例外
+
+以下情况可保留框架约定名称：
+
+- Next.js 约定：`page.tsx`、`layout.tsx`、`loading.tsx` 等
+- 配置文件：`next.config.ts`、`tsconfig.json` 等
+- 知名约定：`README.md`、`package.json` 等
+
+## 新增文件检查
+
+创建新文件或目录时，务必使用 kebab-case 命名。

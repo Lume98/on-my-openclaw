@@ -1,6 +1,58 @@
-# Next Control UI
+# Next Control UI - OpenClaw React 迁移
 
-A modern control interface built with Next.js 16, React 19, and Ant Design 6. This project provides a clean, responsive UI component library for the OpenClaw platform.
+这是一个正在开发中的 OpenClaw 控制面板 React 版本，使用 Next.js 和 Ant Design 构建。
+
+## 🎨 Features
+
+- **Next.js 16** - The latest React framework with App Router
+- **React 19** - Latest React with concurrent features
+- **Ant Design 6** - Enterprise-class UI component library
+- **Tailwind CSS 4** - Utility-first CSS framework
+- **TypeScript** - Full type safety
+- **Geist Font** - Modern font family from Vercel
+- **Lucide Icons** - Beautiful, consistent icon library
+- **Dark Mode** - Built-in dark theme support
+- **WebSocket** - Real-time communication with OpenClaw gateway
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18 or higher
+- npm, yarn, pnpm, or bun
+
+### Installation
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd next-control-ui
+
+# Install dependencies
+npm install
+# or
+yarn install
+# or
+pnpm install
+# or
+bun install
+```
+
+### Development
+
+```bash
+# Start development server
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+访问 http://localhost:3000/demo 查看 OpenClaw 演示。
 
 ## 🎨 Features
 

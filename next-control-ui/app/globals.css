@@ -1,26 +1,319 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f5f7fb;
+  --foreground: #111827;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  min-height: 100%;
 }
 
 body {
-  background: var(--background);
+  margin: 0;
+  background:
+    radial-gradient(circle at top right, rgba(59, 130, 246, 0.08), transparent 28%),
+    linear-gradient(180deg, #f8fafc 0%, #eef3fb 100%);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body), sans-serif;
+}
+
+a {
+  color: inherit;
+}
+
+/* 布局：左右分栏，左侧菜单栏，右侧 = 头部 + 主内容（主内容可滚动） */
+.control-app-layout {
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* 右侧区域：上下结构，主内容区 flex:1 并 overflow:auto 实现独立滚动 */
+.control-app-layout-inner {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.control-sider {
+  border-right: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 2px 0 18px rgba(15, 23, 42, 0.04);
+}
+
+.control-sider .ant-layout-sider-children {
+  display: flex;
+  flex-direction: column;
+}
+
+.control-sider-content {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  padding: 16px 12px 12px;
+}
+
+.control-brand {
+  padding: 8px 8px 18px;
+}
+
+.control-brand-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.control-brand-badge {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #1677ff, #13c2c2);
+  color: white;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.control-brand-copy {
+  min-width: 0;
+}
+
+.control-nav-menu {
+  flex: 1;
+  border-inline-end: none !important;
+  background: transparent !important;
+}
+
+.control-sider-footer {
+  padding: 12px 8px 0;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.control-header {
+  height: auto;
+  padding: 16px 24px !important;
+  backdrop-filter: blur(12px);
+}
+
+.control-header-bar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+}
+
+.control-header-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 0 0 auto;
+}
+
+.control-page-copy {
+  display: grid;
+  gap: 2px;
+}
+
+.control-top-nav {
+  min-width: 0;
+}
+
+.control-header-actions {
+  justify-content: flex-end;
+  flex: 0 0 auto;
+}
+
+/* 主内容区域：占满剩余高度，内部滚动 */
+.control-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 24px !important;
+  background: transparent !important;
+}
+
+.control-breadcrumb {
+  margin-bottom: 16px;
+}
+
+.control-content-surface {
+  padding: 20px;
+}
+
+.control-content-wrap {
+  display: grid;
+  gap: 16px;
+}
+
+.control-footer {
+  padding: 0 24px 24px !important;
+  text-align: right;
+}
+
+.control-field-label {
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.control-inline-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 77, 79, 0.18);
+  border-radius: 12px;
+  background: rgba(255, 77, 79, 0.06);
+  color: #8c2f39;
+}
+
+.control-card {
+  border-radius: 18px !important;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06) !important;
+}
+
+.control-subcard {
+  border-radius: 14px !important;
+}
+
+.control-json-block {
+  margin: 0;
+  overflow: auto;
+  padding: 16px;
+  border-radius: 14px;
+  background: #0f172a;
+  color: #dbeafe;
+  font-size: 12px;
+  line-height: 1.7;
+  font-family: var(--font-mono), monospace;
+}
+
+.chat-transcript {
+  display: grid;
+  gap: 12px;
+}
+
+.chat-bubble {
+  max-width: min(820px, 100%);
+  padding: 14px 16px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 16px;
+  background: white;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
+}
+
+.chat-bubble.is-user {
+  margin-left: auto;
+  background: #e6f4ff;
+  border-color: rgba(22, 119, 255, 0.16);
+}
+
+.chat-bubble.is-assistant,
+.chat-bubble.is-streaming {
+  margin-right: auto;
+}
+
+.chat-bubble.is-streaming {
+  border-style: dashed;
+}
+
+.chat-bubble-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.chat-bubble-text {
+  white-space: pre-wrap;
+  line-height: 1.7;
+  color: #0f172a;
+}
+
+html[data-theme="dark"] body {
+  background:
+    radial-gradient(circle at top right, rgba(34, 211, 238, 0.1), transparent 24%),
+    linear-gradient(180deg, #0b1220 0%, #111827 100%);
+}
+
+html[data-theme="dark"] .control-sider {
+  border-right-color: rgba(148, 163, 184, 0.14);
+  box-shadow: 2px 0 18px rgba(2, 6, 23, 0.22);
+}
+
+html[data-theme="dark"] .control-sider-footer,
+html[data-theme="dark"] .control-header {
+  border-color: rgba(148, 163, 184, 0.12);
+}
+
+html[data-theme="dark"] .control-inline-alert {
+  background: rgba(255, 77, 79, 0.12);
+  color: #fecaca;
+}
+
+html[data-theme="dark"] .chat-bubble {
+  border-color: rgba(148, 163, 184, 0.14);
+  background: rgba(15, 23, 42, 0.88);
+  box-shadow: 0 4px 18px rgba(2, 6, 23, 0.22);
+}
+
+html[data-theme="dark"] .chat-bubble.is-user {
+  background: rgba(22, 119, 255, 0.22);
+}
+
+html[data-theme="dark"] .chat-bubble-meta {
+  color: #94a3b8;
+}
+
+html[data-theme="dark"] .chat-bubble-text {
+  color: #e5e7eb;
+}
+
+@media (max-width: 992px) {
+  .control-header {
+    padding: 16px !important;
+  }
+
+  .control-header-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .control-header-actions {
+    justify-content: flex-start;
+  }
+
+  .control-content {
+    padding: 16px !important;
+  }
+
+  .control-content-surface {
+    padding: 16px;
+  }
+
+  .control-sider-content {
+    min-height: auto;
+    padding: 0;
+  }
+
+  .control-footer {
+    padding: 0 16px 16px !important;
+    text-align: left;
+  }
 }

@@ -37,6 +37,6 @@ export {
   // Helper components
   Icon,
   iconMap,
-} from "./icons";
+} from "@/components/icons/icons";
 
-export type { IconProps, IconName } from "./icons";
+export type { IconProps, IconName } from "@/components/icons/icons";

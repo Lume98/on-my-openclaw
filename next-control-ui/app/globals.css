@@ -1102,16 +1102,25 @@ html[data-theme="dark"] .control-nav-menu-wrapper::-webkit-scrollbar-thumb:hover
    Agents 页（参照上层 UI + 设计图：白底、红强调）
    =========================================== */
 
+/* 确保 agents 页占满内容区并保持两栏布局 */
+.control-content-wrap:has(.agents-page-wrap) {
+  display: block;
+  width: 100%;
+}
+
 .agents-page-wrap {
   width: 100%;
+  min-width: 0;
   min-height: 0;
 }
 
 .agents-layout {
-  display: grid;
+  display: grid !important;
   grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
   gap: 20px;
   align-items: start;
+  width: 100%;
+  min-width: 0;
 }
 
 .agents-sidebar {
@@ -1123,6 +1132,7 @@ html[data-theme="dark"] .control-nav-menu-wrapper::-webkit-scrollbar-thumb:hover
   border: 1px solid rgba(15, 23, 42, 0.08);
   background: #fff;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  min-width: 0;
 }
 
 .agents-sidebar-header {
@@ -1171,16 +1181,16 @@ html[data-theme="dark"] .control-nav-menu-wrapper::-webkit-scrollbar-thumb:hover
 }
 
 .agent-row.active {
-  border-color: #dc2626;
-  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
+  border-color: #1677ff;
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.2);
 }
 
 .agent-avatar {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: rgba(220, 38, 38, 0.12);
-  color: #dc2626;
+  background: rgba(22, 119, 255, 0.12);
+  color: #1677ff;
   display: grid;
   place-items: center;
   font-weight: 600;
@@ -1225,6 +1235,12 @@ html[data-theme="dark"] .control-nav-menu-wrapper::-webkit-scrollbar-thumb:hover
   min-width: 0;
 }
 
+.agent-row,
+.agent-tab {
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
 .agent-header-card {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -1248,8 +1264,8 @@ html[data-theme="dark"] .control-nav-menu-wrapper::-webkit-scrollbar-thumb:hover
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: rgba(220, 38, 38, 0.12);
-  color: #dc2626;
+  background: rgba(22, 119, 255, 0.12);
+  color: #1677ff;
   display: grid;
   place-items: center;
   font-weight: 600;
@@ -1288,6 +1304,7 @@ html[data-theme="dark"] .control-nav-menu-wrapper::-webkit-scrollbar-thumb:hover
   flex-wrap: wrap;
   padding: 0 4px;
   border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  flex-shrink: 0;
 }
 
 .agent-tab {
@@ -1308,8 +1325,8 @@ html[data-theme="dark"] .control-nav-menu-wrapper::-webkit-scrollbar-thumb:hover
 }
 
 .agent-tab.active {
-  color: #dc2626;
-  border-bottom-color: #dc2626;
+  color: #1677ff;
+  border-bottom-color: #1677ff;
 }
 
 .agent-panel-card {
@@ -1390,8 +1407,8 @@ html[data-theme="dark"] .control-nav-menu-wrapper::-webkit-scrollbar-thumb:hover
 }
 
 .agent-file-row.active {
-  border-color: #dc2626;
-  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
+  border-color: #1677ff;
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.2);
 }
 
 .agent-file-name {

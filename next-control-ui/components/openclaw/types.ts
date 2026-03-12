@@ -216,19 +216,43 @@ export type AgentsListResult = {
       name?: string;
       avatar?: string;
       avatarUrl?: string;
+      theme?: string;
     };
     [key: string]: unknown;
   }>;
   defaultId: string | null;
 };
 
+export type AgentFileEntry = {
+  name: string;
+  path: string;
+  missing: boolean;
+  size?: number;
+  updatedAtMs?: number;
+  content?: string;
+};
+
+export type AgentsFilesListResult = {
+  agentId: string;
+  workspace: string;
+  files: AgentFileEntry[];
+};
+
 export type ToolsCatalogResult = {
-  tools: Array<{
+  tools?: Array<{
     name: string;
     description?: string;
     schema?: unknown;
     [key: string]: unknown;
   }>;
+  groups?: Array<{
+    id: string;
+    label: string;
+    tools: Array<{ id: string; label?: string; description?: string; [key: string]: unknown }>;
+    [key: string]: unknown;
+  }>;
+  agentId?: string | null;
+  [key: string]: unknown;
 };
 
 export type ConfigSnapshot = {
@@ -246,11 +270,22 @@ export type ConfigSchemaResponse = {
   uiHints?: Record<string, unknown>;
 };
 
+export type LogLevel = "trace" | "debug" | "info" | "warn" | "error" | "fatal";
+
 export type LogEntry = {
   raw: string;
   message: string;
   time?: string | null;
-  level?: string | null;
+  level?: LogLevel | null;
   subsystem?: string | null;
   meta?: Record<string, unknown>;
+};
+
+export type LogsTailPayload = {
+  file?: string;
+  cursor?: number;
+  size?: number;
+  lines?: string[];
+  truncated?: boolean;
+  reset?: boolean;
 };

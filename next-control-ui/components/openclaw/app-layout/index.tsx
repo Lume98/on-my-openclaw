@@ -107,7 +107,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             children={children}
             activeTab={activeTab}
             lastError={lastError}
-            skipSurface={pathname === "/overview"}
+            skipSurface={pathname === "/overview" || pathname === "/agents"}
           />
 
           <ConfirmGatewayModal

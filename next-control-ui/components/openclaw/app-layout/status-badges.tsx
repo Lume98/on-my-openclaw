@@ -1,4 +1,7 @@
-import { CONNECTION_STATUS, HEADER_LABELS } from "./header-constants";
+import {
+  CONNECTION_STATUS,
+  HEADER_LABELS,
+} from "@/components/openclaw/app-layout/header-constants";
 
 type StatusBadgesProps = {
   connected: boolean;

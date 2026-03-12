@@ -22,9 +22,9 @@ import {
   Typography,
 } from "antd";
 import { ConnectErrorDetailCodes } from "@/components/openclaw/connect-error-details";
+import { formatDuration } from "@/components/openclaw/panels/dashboard-utils";
 import { useGateway } from "@/components/openclaw/providers/gateway-provider";
 import { useSettings } from "@/components/openclaw/providers/settings-provider";
-import { formatDuration } from "./dashboard-utils";
 
 const { Text, Title } = Typography;
 

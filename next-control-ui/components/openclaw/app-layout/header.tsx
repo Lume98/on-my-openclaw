@@ -3,10 +3,10 @@
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import { Button, Grid, Layout, Tooltip } from "antd";
 import type { CSSProperties } from "react";
+import { HeaderActions } from "@/components/openclaw/app-layout/header-actions";
+import { HEADER_ACTIONS } from "@/components/openclaw/app-layout/header-constants";
+import { StatusBadges } from "@/components/openclaw/app-layout/status-badges";
 import type { TabDefinition } from "@/components/openclaw/navigation";
-import { HeaderActions } from "./header-actions";
-import { HEADER_ACTIONS } from "./header-constants";
-import { StatusBadges } from "./status-badges";
 
 const { Header } = Layout;
 const { useBreakpoint } = Grid;

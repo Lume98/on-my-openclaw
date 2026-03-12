@@ -21,7 +21,7 @@ type SidebarProps = {
   style?: CSSProperties;
 };
 
-const defaultExpandedGroups: TabGroupKey[] = ["chat", "control", "agent", "settings"];
+const defaultExpandedGroups: TabGroupKey[] = ["chat", "control", "agent", "settings", "docs"];
 
 export function Sidebar({
   pathname,
@@ -45,6 +45,11 @@ export function Sidebar({
   };
 
   const handleNav = (path: string) => {
+    // 处理外部链接
+    if (path.startsWith("http")) {
+      window.open(path, "_blank", "noreferrer");
+      return;
+    }
     router.push(path);
     onMenuItemClick?.();
   };
@@ -126,18 +131,6 @@ export function Sidebar({
           </div>
         )}
       </nav>
-
-      {/* Footer */}
-      <div className="control-sider-footer">
-        <a
-          href="https://docs.openclaw.ai"
-          target="_blank"
-          rel="noreferrer"
-          className="control-sider-footer-link"
-        >
-          文档
-        </a>
-      </div>
     </div>
   );
 

@@ -1,8 +1,8 @@
 "use client";
 
 import { Button, Empty, SectionCard, Table } from "@/components/openclaw/panels/dashboard-utils";
+import { formatTimestamp } from "@/components/openclaw/panels/dashboard-utils";
 import { useGateway } from "@/components/openclaw/providers/gateway-provider";
-import { formatTimestamp } from "./dashboard-utils";
 
 export function InstancesPanel() {
   const { presenceEntries, refreshPresence } = useGateway();

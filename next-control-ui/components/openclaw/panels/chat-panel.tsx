@@ -2,10 +2,14 @@
 
 import { Alert, Button, Drawer, Empty, Space, Spin, Typography } from "antd";
 import { useCallback, useEffect, useState } from "react";
+import {
+  JsonBlock,
+  SectionCard,
+  formatTimestamp,
+} from "@/components/openclaw/panels/dashboard-utils";
 import { useGateway } from "@/components/openclaw/providers/gateway-provider";
 import { useSettings } from "@/components/openclaw/providers/settings-provider";
 import type { ChatAttachment, ChatMessage } from "@/components/openclaw/types";
-import { JsonBlock, SectionCard, formatTimestamp } from "./dashboard-utils";
 
 const { Text } = Typography;
 

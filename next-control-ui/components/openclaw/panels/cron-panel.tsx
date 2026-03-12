@@ -2,9 +2,9 @@
 
 import { useCallback } from "react";
 import { Button, Col, Row, SectionCard, Space } from "@/components/openclaw/panels/dashboard-utils";
+import { JsonBlock } from "@/components/openclaw/panels/dashboard-utils";
+import { useGatewayQuery } from "@/components/openclaw/panels/use-gateway-query";
 import { useGateway } from "@/components/openclaw/providers/gateway-provider";
-import { JsonBlock } from "./dashboard-utils";
-import { useGatewayQuery } from "./use-gateway-query";
 
 export function CronPanel() {
   const { request, connected } = useGateway();

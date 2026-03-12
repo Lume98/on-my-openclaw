@@ -3,15 +3,15 @@
 import { Layout, theme } from "antd";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { ConfirmGatewayModal } from "@/components/openclaw/app-layout/confirm-gateway-modal";
+import { ConnectModal } from "@/components/openclaw/app-layout/connect-modal";
+import { AppHeader } from "@/components/openclaw/app-layout/header";
+import { Main } from "@/components/openclaw/app-layout/main";
+import { MobileDrawer } from "@/components/openclaw/app-layout/mobile-drawer";
+import { Sidebar } from "@/components/openclaw/app-layout/sidebar";
 import { getTabByPath } from "@/components/openclaw/navigation";
 import { useGateway } from "@/components/openclaw/providers/gateway-provider";
 import { useSettings } from "@/components/openclaw/providers/settings-provider";
-import { ConfirmGatewayModal } from "./confirm-gateway-modal";
-import { ConnectModal } from "./connect-modal";
-import { AppHeader } from "./header";
-import { Main } from "./main";
-import { MobileDrawer } from "./mobile-drawer";
-import { Sidebar } from "./sidebar";
 
 type AppLayoutProps = {
   children: React.ReactNode;

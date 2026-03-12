@@ -12,9 +12,9 @@ import {
   Select,
   Space,
 } from "@/components/openclaw/panels/dashboard-utils";
+import { JsonBlock, stringify } from "@/components/openclaw/panels/dashboard-utils";
+import { useGatewayQuery } from "@/components/openclaw/panels/use-gateway-query";
 import { useGateway } from "@/components/openclaw/providers/gateway-provider";
-import { JsonBlock, stringify } from "./dashboard-utils";
-import { useGatewayQuery } from "./use-gateway-query";
 
 export function DebugPanel() {
   const { request, connected, hello } = useGateway();

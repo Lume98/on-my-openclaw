@@ -2,10 +2,10 @@
 
 import { Alert, Button, Card, Empty, Space, Spin, Switch, Tag, Typography } from "antd";
 import React, { useCallback, useMemo, useState } from "react";
+import { formatTimestamp, SectionCard } from "@/components/openclaw/panels/dashboard-utils";
+import { useGatewayQuery } from "@/components/openclaw/panels/use-gateway-query";
 import { useGateway } from "@/components/openclaw/providers/gateway-provider";
 import type { ChannelsStatusSnapshot } from "@/components/openclaw/types";
-import { formatTimestamp, SectionCard } from "./dashboard-utils";
-import { useGatewayQuery } from "./use-gateway-query";
 
 const { Text } = Typography;
 
@@ -34,26 +34,29 @@ function collectChannelFacts(account: unknown): Array<{ label: string; value: st
     }
   };
 
-  append("模式", account.mode);
-  append("Base URL", account.baseUrl);
-  append("Webhook URL", account.webhookUrl);
-  append("Webhook Path", account.webhookPath);
-  append("Token 来源", account.tokenSource);
-  append("Bot Token 来源", account.botTokenSource);
-  append("App Token 来源", account.appTokenSource);
-  append("Credential 来源", account.credentialSource);
-  append("Audience", account.audience);
-  append("Audience 类型", account.audienceType);
-  append("端口", account.port);
-  append("CLI 路径", account.cliPath);
-  append("DB 路径", account.dbPath);
+  if (typeof account === "object" && account !== null) {
+    const acc = account as Record<string, unknown>;
+    append("模式", acc.mode);
+    append("Base URL", acc.baseUrl);
+    append("Webhook URL", acc.webhookUrl);
+    append("Webhook Path", acc.webhookPath);
+    append("Token 来源", acc.tokenSource);
+    append("Bot Token 来源", acc.botTokenSource);
+    append("App Token 来源", acc.appTokenSource);
+    append("Credential 来源", acc.credentialSource);
+    append("Audience", acc.audience);
+    append("Audience 类型", acc.audienceType);
+    append("端口", acc.port);
+    append("CLI 路径", acc.cliPath);
+    append("DB 路径", acc.dbPath);
 
-  if (Array.isArray(account.allowFrom) && account.allowFrom.length > 0) {
-    pairs.push({ label: "允许来源", value: account.allowFrom.join(", ") });
-  }
+    if (Array.isArray(acc.allowFrom) && acc.allowFrom.length > 0) {
+      pairs.push({ label: "允许来源", value: acc.allowFrom.join(", ") });
+    }
 
-  if (typeof account.allowUnmentionedGroups === "boolean") {
-    pairs.push({ label: "允许未提及群组", value: account.allowUnmentionedGroups ? "是" : "否" });
+    if (typeof acc.allowUnmentionedGroups === "boolean") {
+      pairs.push({ label: "允许未提及群组", value: acc.allowUnmentionedGroups ? "是" : "否" });
+    }
   }
 
   return pairs;

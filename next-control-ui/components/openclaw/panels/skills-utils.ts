@@ -42,8 +42,8 @@ export function groupSkills(skills: SkillStatusEntry[]): SkillGroup[] {
       other.skills.push(skill);
     }
   }
-  const ordered = SKILL_SOURCE_GROUPS.map((id) => groups.get(id)).filter(
-    (g): g is SkillGroup => Boolean(g) && (g.skills.length > 0 || g.id === "built-in"),
+  const ordered = SKILL_SOURCE_GROUPS.map((def) => groups.get(def.id)).filter(
+    (g): g is SkillGroup => g !== undefined && (g.skills.length > 0 || g.id === "built-in"),
   );
   if (other.skills.length > 0) {
     ordered.push(other);

@@ -14,16 +14,16 @@
  * ```
  */
 
-export { OverviewPanel } from "./overview-panel";
-export { ChatPanel } from "./chat-panel";
-export { ChannelsPanel } from "./channels-panel";
-export { InstancesPanel } from "./instances-panel";
-export { SessionsPanel } from "./sessions-panel";
-export { UsagePanel } from "./usage-panel";
-export { CronPanel } from "./cron-panel";
-export { AgentsPanel } from "./agents-panel";
-export { SkillsPanel } from "./skills-panel";
-export { NodesPanel } from "./nodes-panel";
-export { ConfigPanel } from "./config-panel";
-export { DebugPanel } from "./debug-panel";
-export { LogsPanel } from "./logs-panel";
+export { OverviewPanel } from "@/components/openclaw/panels/overview-panel";
+export { ChatPanel } from "@/components/openclaw/panels/chat-panel";
+export { ChannelsPanel } from "@/components/openclaw/panels/channels-panel";
+export { InstancesPanel } from "@/components/openclaw/panels/instances-panel";
+export { SessionsPanel } from "@/components/openclaw/panels/sessions-panel";
+export { UsagePanel } from "@/components/openclaw/panels/usage-panel";
+export { CronPanel } from "@/components/openclaw/panels/cron-panel";
+export { AgentsPanel } from "@/components/openclaw/panels/agents-panel";
+export { SkillsPanel } from "@/components/openclaw/panels/skills-panel";
+export { NodesPanel } from "@/components/openclaw/panels/nodes-panel";
+export { ConfigPanel } from "@/components/openclaw/panels/config-panel";
+export { DebugPanel } from "@/components/openclaw/panels/debug-panel";
+export { LogsPanel } from "@/components/openclaw/panels/logs-panel";

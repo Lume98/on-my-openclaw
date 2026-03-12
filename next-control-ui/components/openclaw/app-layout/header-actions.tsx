@@ -2,7 +2,7 @@
 
 import { MoonOutlined, SunOutlined } from "@ant-design/icons";
 import { Button, Space, Tooltip } from "antd";
-import { HEADER_ACTIONS } from "./header-constants";
+import { HEADER_ACTIONS } from "@/components/openclaw/app-layout/header-constants";
 
 type HeaderActionsProps = {
   theme: string;

@@ -13,13 +13,14 @@ export type TabKey =
   | "nodes"
   | "config"
   | "debug"
-  | "logs";
+  | "logs"
+  | "docs";
 
-export type TabGroupKey = "chat" | "control" | "agent" | "settings";
+export type TabGroupKey = "chat" | "control" | "agent" | "settings" | "docs";
 
 export type TabDefinition = {
   key: TabKey;
-  path: `/${string}`;
+  path: `/${string}` | `https://${string}`;
   title: string;
   subtitle: string;
   icon: IconName;
@@ -31,6 +32,7 @@ export const tabGroups: Array<{ key: TabGroupKey; title: string }> = [
   { key: "control", title: "控制" },
   { key: "agent", title: "代理" },
   { key: "settings", title: "设置" },
+  { key: "docs", title: "文档" },
 ];
 
 export const tabs: TabDefinition[] = [
@@ -138,10 +140,20 @@ export const tabs: TabDefinition[] = [
     icon: "scrollText",
     group: "settings",
   },
+  {
+    key: "docs",
+    path: "https://docs.openclaw.ai",
+    title: "文档",
+    subtitle: "查看 OpenClaw 官方文档和参考资源。",
+    icon: "book",
+    group: "docs",
+  },
 ];
 
 export const tabMap = new Map<TabKey, TabDefinition>(tabs.map((tab) => [tab.key, tab]));
-export const pathMap = new Map<string, TabDefinition>(tabs.map((tab) => [tab.path, tab]));
+export const pathMap = new Map<string, TabDefinition>(
+  tabs.filter((tab) => !tab.path.startsWith("http")).map((tab) => [tab.path, tab]),
+);
 
 export function getTabDefinition(tabKey: TabKey) {
   return tabMap.get(tabKey) ?? tabMap.get("chat")!;

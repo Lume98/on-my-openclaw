@@ -19,7 +19,7 @@ import {
   Tag,
 } from "antd";
 
-export { JsonBlock, SectionCard } from "./dashboard-components";
+export { JsonBlock, SectionCard } from "@/components/openclaw/panels/dashboard-components";
 
 export function stringify(value: unknown) {
   try {

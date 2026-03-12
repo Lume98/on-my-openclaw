@@ -10,9 +10,9 @@ import {
   Switch,
   Typography,
 } from "@/components/openclaw/panels/dashboard-utils";
+import { useGatewayQuery } from "@/components/openclaw/panels/use-gateway-query";
 import { useGateway } from "@/components/openclaw/providers/gateway-provider";
 import type { SkillStatusReport } from "@/components/openclaw/types";
-import { useGatewayQuery } from "./use-gateway-query";
 
 const { Title } = Typography;
 

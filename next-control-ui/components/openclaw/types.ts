@@ -238,19 +238,24 @@ export type AgentsFilesListResult = {
   files: AgentFileEntry[];
 };
 
+export type ToolCatalogProfileId = "minimal" | "coding" | "messaging" | "full";
+
 export type ToolsCatalogResult = {
-  tools?: Array<{
-    name: string;
-    description?: string;
-    schema?: unknown;
-    [key: string]: unknown;
-  }>;
+  tools?: Array<{ name: string; description?: string; schema?: unknown; [key: string]: unknown }>;
   groups?: Array<{
     id: string;
     label: string;
-    tools: Array<{ id: string; label?: string; description?: string; [key: string]: unknown }>;
+    source?: "core" | "plugin";
+    tools: Array<{
+      id: string;
+      label?: string;
+      description?: string;
+      defaultProfiles?: ToolCatalogProfileId[];
+      [key: string]: unknown;
+    }>;
     [key: string]: unknown;
   }>;
+  profiles?: Array<{ id: string; label: string }>;
   agentId?: string | null;
   [key: string]: unknown;
 };

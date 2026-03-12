@@ -1,12 +1,20 @@
 "use client";
 
-import { Alert, Button, Empty, Input, Spin, Switch, Table, Tag, Typography } from "antd";
+import { Alert, Button, Empty, Input, Select, Spin, Switch, Table, Tag, Typography } from "antd";
 import { useCallback, useEffect, useState } from "react";
 import {
+  getConfiguredModelOptions,
+  parseFallbackList,
   resolveAgentConfig,
+  resolveEffectiveModelFallbacks,
   resolveModelLabel,
+  resolveModelPrimary,
 } from "@/components/openclaw/panels/agents-config-utils";
 import { JsonBlock } from "@/components/openclaw/panels/dashboard-utils";
+import {
+  DEFAULT_PROFILE_OPTIONS,
+  isToolAllowed,
+} from "@/components/openclaw/panels/tools-policy-utils";
 import { useGatewayQuery } from "@/components/openclaw/panels/use-gateway-query";
 import { useGateway } from "@/components/openclaw/providers/gateway-provider";
 import type {
@@ -17,6 +25,7 @@ import type {
   CronJob,
   CronStatus,
   SkillStatusReport,
+  ToolCatalogProfileId,
   ToolsCatalogResult,
 } from "@/components/openclaw/types";
 
@@ -90,13 +99,25 @@ export function AgentsPanel() {
   const [fileLoading, setFileLoading] = useState(false);
   const [fileSaving, setFileSaving] = useState(false);
   const [fileLoadError, setFileLoadError] = useState<string | null>(null);
+  const [configSaving, setConfigSaving] = useState(false);
+  const [overviewModelPrimaryDraft, setOverviewModelPrimaryDraft] = useState<
+    string | null | undefined
+  >(undefined);
+  const [overviewModelFallbacksDraft, setOverviewModelFallbacksDraft] = useState<
+    string[] | undefined
+  >(undefined);
+  type ToolsDraft = { profile?: string | null; alsoAllow?: string[]; deny?: string[] };
+  const [toolsDraft, setToolsDraft] = useState<ToolsDraft | null>(null);
 
-  // 切换代理时清空文件缓存，避免串数据（用 selectedAgentId，因其在 activeAgentId 之前已定义）
+  // 切换代理时清空文件缓存与 Overview/Tools 草稿
   useEffect(() => {
     setFileContents({});
     setFileDrafts({});
     setActiveFileName(null);
     setFileLoadError(null);
+    setOverviewModelPrimaryDraft(undefined);
+    setOverviewModelFallbacksDraft(undefined);
+    setToolsDraft(null);
   }, [selectedAgentId]);
 
   const agents = useGatewayQuery<AgentsListResult>(
@@ -196,6 +217,28 @@ export function AgentsPanel() {
     (configDefaults as { workspace?: string } | undefined)?.workspace ??
     "—";
   const primaryModel = resolveModelLabel(agentConfigEntry?.model ?? configDefaults?.model);
+  const defaultPrimary = resolveModelPrimary(configDefaults?.model);
+  const modelPrimaryFromEntry = resolveModelPrimary(agentConfigEntry?.model);
+  const effectivePrimary =
+    overviewModelPrimaryDraft !== undefined
+      ? overviewModelPrimaryDraft
+      : (modelPrimaryFromEntry ?? (primaryModel !== "—" ? primaryModel : null) ?? defaultPrimary);
+  const modelFallbacksFromConfig = resolveEffectiveModelFallbacks(
+    agentConfigEntry?.model,
+    configDefaults?.model,
+  );
+  const fallbackTextFromConfig = modelFallbacksFromConfig
+    ? modelFallbacksFromConfig.join(", ")
+    : "";
+  const fallbackText =
+    overviewModelFallbacksDraft !== undefined
+      ? overviewModelFallbacksDraft.join(", ")
+      : fallbackTextFromConfig;
+  const overviewConfigDirty =
+    (overviewModelPrimaryDraft !== undefined &&
+      overviewModelPrimaryDraft !== (modelPrimaryFromEntry ?? defaultPrimary ?? null)) ||
+    (overviewModelFallbacksDraft !== undefined &&
+      overviewModelFallbacksDraft.join(", ") !== fallbackTextFromConfig);
   const identityName =
     (selectedAgent?.name?.trim() ||
       selectedAgent?.identity?.name?.trim() ||
@@ -204,8 +247,41 @@ export function AgentsPanel() {
     "—";
   const identityEmoji = resolveAgentEmoji(selectedAgent ?? {}) || "—";
   const skillsFilter = Array.isArray(agentConfigEntry?.skills)
-    ? `${agentConfigEntry.skills.length} selected`
-    : "all skills";
+    ? `已选 ${agentConfigEntry.skills.length} 项`
+    : "全部技能";
+
+  const toolCatalogGroups = tools.data?.groups ?? [];
+  const effectiveToolsProfile =
+    toolsDraft?.profile ??
+    agentConfigEntry?.tools?.profile ??
+    (configGlobalTools as { profile?: string } | undefined)?.profile ??
+    "full";
+  const effectiveToolsAlsoAllow = toolsDraft?.alsoAllow ?? agentConfigEntry?.tools?.alsoAllow ?? [];
+  const effectiveToolsDeny = toolsDraft?.deny ?? agentConfigEntry?.tools?.deny ?? [];
+  const hasAgentAllow = Boolean(
+    Array.isArray(agentConfigEntry?.tools?.allow) && agentConfigEntry.tools.allow.length > 0,
+  );
+  const allToolIds = toolCatalogGroups.flatMap((g) => (g.tools ?? []).map((t) => t.id));
+  const enabledToolCount = toolCatalogGroups.reduce((acc, g) => {
+    for (const t of g.tools ?? []) {
+      const { allowed } = isToolAllowed({
+        toolId: t.id,
+        profile: effectiveToolsProfile,
+        defaultProfiles: t.defaultProfiles,
+        alsoAllow: effectiveToolsAlsoAllow,
+        deny: effectiveToolsDeny,
+      });
+      if (allowed) {
+        acc += 1;
+      }
+    }
+    return acc;
+  }, 0);
+  const totalToolCount = allToolIds.length;
+  const toolsDirty = toolsDraft !== null;
+  const profileOptionsFromApi = tools.data?.profiles?.length
+    ? tools.data.profiles
+    : DEFAULT_PROFILE_OPTIONS.filter((p) => p.id !== "inherit");
 
   // 选中文件时加载内容
   useEffect(() => {
@@ -272,6 +348,148 @@ export function AgentsPanel() {
     }
   }, [activeAgentId, activeFileName, activeDraft, connected, request, fileSaving]);
 
+  const handleConfigReload = useCallback(() => {
+    void config.refresh();
+  }, [config]);
+
+  const handleOverviewModelSave = useCallback(async () => {
+    if (!activeAgentId || !configSnapshot?.hash || !connected || configSaving) {
+      return;
+    }
+    const primary =
+      overviewModelPrimaryDraft !== undefined ? overviewModelPrimaryDraft : effectivePrimary;
+    const fallbacks =
+      overviewModelFallbacksDraft !== undefined
+        ? overviewModelFallbacksDraft
+        : (modelFallbacksFromConfig ?? []);
+    setConfigSaving(true);
+    try {
+      await request("config.patch", {
+        baseHash: configSnapshot.hash,
+        raw: JSON.stringify({
+          agents: {
+            list: [{ id: activeAgentId, model: { primary: primary || null, fallbacks } }],
+          },
+        }),
+      });
+      await config.refresh();
+      setOverviewModelPrimaryDraft(undefined);
+      setOverviewModelFallbacksDraft(undefined);
+    } finally {
+      setConfigSaving(false);
+    }
+  }, [
+    activeAgentId,
+    configSnapshot?.hash,
+    connected,
+    configSaving,
+    request,
+    config,
+    overviewModelPrimaryDraft,
+    overviewModelFallbacksDraft,
+    effectivePrimary,
+    modelFallbacksFromConfig,
+  ]);
+
+  const handleToolsPreset = useCallback(
+    (profileId: string) => {
+      if (profileId === "inherit") {
+        const globalProfile =
+          (configGlobalTools as { profile?: string } | undefined)?.profile ?? "full";
+        setToolsDraft({ profile: globalProfile, alsoAllow: [], deny: [] });
+        return;
+      }
+      setToolsDraft({ profile: profileId, alsoAllow: [], deny: [] });
+    },
+    [configGlobalTools],
+  );
+
+  const handleToolsEnableAll = useCallback(() => {
+    setToolsDraft((prev) => ({
+      profile: prev?.profile ?? effectiveToolsProfile,
+      alsoAllow: [...allToolIds],
+      deny: [],
+    }));
+  }, [allToolIds, effectiveToolsProfile]);
+
+  const handleToolsDisableAll = useCallback(() => {
+    setToolsDraft((prev) => ({
+      profile: prev?.profile ?? effectiveToolsProfile,
+      alsoAllow: [],
+      deny: [...allToolIds],
+    }));
+  }, [allToolIds, effectiveToolsProfile]);
+
+  const handleToolToggle = useCallback(
+    (toolId: string, enabled: boolean) => {
+      const toolEntry = toolCatalogGroups
+        .flatMap((g) => g.tools ?? [])
+        .find((t) => t.id === toolId);
+      const { baseAllowed } = toolEntry
+        ? isToolAllowed({
+            toolId: toolEntry.id,
+            profile: effectiveToolsProfile,
+            defaultProfiles: toolEntry.defaultProfiles,
+            alsoAllow: effectiveToolsAlsoAllow,
+            deny: effectiveToolsDeny,
+          })
+        : { baseAllowed: false };
+      setToolsDraft((prev) => {
+        const profile = prev?.profile ?? effectiveToolsProfile;
+        let alsoAllow = prev?.alsoAllow ?? [...effectiveToolsAlsoAllow];
+        let deny = prev?.deny ?? [...effectiveToolsDeny];
+        if (enabled) {
+          deny = deny.filter((id) => id !== toolId);
+          if (!baseAllowed && !alsoAllow.includes(toolId)) {
+            alsoAllow = [...alsoAllow, toolId];
+          }
+        } else {
+          alsoAllow = alsoAllow.filter((id) => id !== toolId);
+          if (!deny.includes(toolId)) {
+            deny = [...deny, toolId];
+          }
+        }
+        return { profile, alsoAllow, deny };
+      });
+    },
+    [toolCatalogGroups, effectiveToolsProfile, effectiveToolsAlsoAllow, effectiveToolsDeny],
+  );
+
+  const handleToolsSave = useCallback(async () => {
+    if (!activeAgentId || !configSnapshot?.hash || !connected || configSaving) {
+      return;
+    }
+    const profile = toolsDraft?.profile ?? effectiveToolsProfile;
+    const alsoAllow = toolsDraft?.alsoAllow ?? effectiveToolsAlsoAllow;
+    const deny = toolsDraft?.deny ?? effectiveToolsDeny;
+    setConfigSaving(true);
+    try {
+      await request("config.patch", {
+        baseHash: configSnapshot.hash,
+        raw: JSON.stringify({
+          agents: {
+            list: [{ id: activeAgentId, tools: { profile, alsoAllow, deny } }],
+          },
+        }),
+      });
+      await config.refresh();
+      setToolsDraft(null);
+    } finally {
+      setConfigSaving(false);
+    }
+  }, [
+    activeAgentId,
+    configSnapshot?.hash,
+    connected,
+    configSaving,
+    request,
+    config,
+    toolsDraft,
+    effectiveToolsProfile,
+    effectiveToolsAlsoAllow,
+    effectiveToolsDeny,
+  ]);
+
   const cronStatus = cron.data?.[0] ?? null;
   const cronJobsRaw = cron.data?.[1]?.jobs ?? [];
   const cronJobsForAgent = activeAgentId
@@ -279,12 +497,12 @@ export function AgentsPanel() {
     : [];
 
   const tabs: Array<{ key: AgentsPanelTab; label: string }> = [
-    { key: "overview", label: "Overview" },
-    { key: "files", label: "Files" },
-    { key: "tools", label: "Tools" },
-    { key: "skills", label: "Skills" },
-    { key: "channels", label: "Channels" },
-    { key: "cron", label: "Cron Jobs" },
+    { key: "overview", label: "概览" },
+    { key: "files", label: "文件" },
+    { key: "tools", label: "工具" },
+    { key: "skills", label: "技能" },
+    { key: "channels", label: "通道" },
+    { key: "cron", label: "定时任务" },
   ];
 
   const channelIds = channels.data
@@ -302,11 +520,13 @@ export function AgentsPanel() {
         <aside className="agents-sidebar">
           <div className="agents-sidebar-header">
             <div>
-              <h2 className="agents-sidebar-title">Agents</h2>
-              <p className="agents-sidebar-sub">{agents.data?.agents?.length ?? 0} configured.</p>
+              <h2 className="agents-sidebar-title">代理</h2>
+              <p className="agents-sidebar-sub">
+                已配置 {agents.data?.agents?.length ?? 0} 个代理。
+              </p>
             </div>
             <Button size="small" onClick={() => void agents.refresh()} loading={agents.loading}>
-              Refresh
+              刷新
             </Button>
           </div>
           {agents.error && (
@@ -314,9 +534,7 @@ export function AgentsPanel() {
           )}
           <div className="agents-list">
             {(agents.data?.agents ?? []).length === 0 && !agents.loading ? (
-              <p style={{ fontSize: 13, color: "rgba(15,23,42,0.55)", margin: 0 }}>
-                No agents found.
-              </p>
+              <p style={{ fontSize: 13, color: "rgba(15,23,42,0.55)", margin: 0 }}>未找到代理。</p>
             ) : (
               (agents.data?.agents ?? []).map((agent) => {
                 const label = normalizeAgentLabel(agent);
@@ -338,7 +556,7 @@ export function AgentsPanel() {
                       <span className="agent-title">{label}</span>
                       <span className="agent-sub">{agent.description ?? agent.id}</span>
                     </div>
-                    {isDefault && <span className="agent-pill">DEFAULT</span>}
+                    {isDefault && <span className="agent-pill">默认</span>}
                   </button>
                 );
               })
@@ -363,7 +581,7 @@ export function AgentsPanel() {
                   <div className="agent-header-meta">
                     <span className="agent-header-title">{normalizeAgentLabel(selectedAgent)}</span>
                     <span className="agent-header-sub">
-                      {selectedAgent.identity?.theme?.trim() || "Agent workspace and routing."}
+                      {selectedAgent.identity?.theme?.trim() || "代理工作区与路由。"}
                     </span>
                   </div>
                 </div>
@@ -377,7 +595,7 @@ export function AgentsPanel() {
                   >
                     {selectedAgent.id}
                   </span>
-                  {defaultId === selectedAgent.id && <span className="agent-pill">DEFAULT</span>}
+                  {defaultId === selectedAgent.id && <span className="agent-pill">默认</span>}
                 </div>
               </div>
 
@@ -396,34 +614,113 @@ export function AgentsPanel() {
 
               {activeTab === "overview" && (
                 <div className="agent-panel-card">
-                  <h3 className="agent-panel-title">Overview</h3>
+                  <h3 className="agent-panel-title">概览</h3>
                   <p className="agent-panel-sub">工作区路径与身份信息。</p>
                   <div className="agents-overview-grid" style={{ marginTop: 16 }}>
                     <div className="agent-kv">
-                      <span className="agent-kv-label">Workspace</span>
+                      <span className="agent-kv-label">工作区</span>
                       <span className="agent-kv-value">{workspace}</span>
                     </div>
                     <div className="agent-kv">
-                      <span className="agent-kv-label">Primary Model</span>
+                      <span className="agent-kv-label">主模型</span>
                       <span className="agent-kv-value">{primaryModel}</span>
                     </div>
                     <div className="agent-kv">
-                      <span className="agent-kv-label">Identity Name</span>
+                      <span className="agent-kv-label">身份名称</span>
                       <span className="agent-kv-value">{identityName}</span>
                     </div>
                     <div className="agent-kv">
-                      <span className="agent-kv-label">Default</span>
+                      <span className="agent-kv-label">默认代理</span>
                       <span className="agent-kv-value">
-                        {defaultId === selectedAgent.id ? "yes" : "no"}
+                        {defaultId === selectedAgent.id ? "是" : "否"}
                       </span>
                     </div>
                     <div className="agent-kv">
-                      <span className="agent-kv-label">Identity Emoji</span>
+                      <span className="agent-kv-label">身份 Emoji</span>
                       <span className="agent-kv-value">{identityEmoji}</span>
                     </div>
                     <div className="agent-kv">
-                      <span className="agent-kv-label">Skills Filter</span>
+                      <span className="agent-kv-label">技能筛选</span>
                       <span className="agent-kv-value">{skillsFilter}</span>
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: 24 }}>
+                    <Typography.Text strong style={{ display: "block", marginBottom: 12 }}>
+                      模型选择
+                    </Typography.Text>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 12,
+                        alignItems: "flex-start",
+                        marginBottom: 12,
+                      }}
+                    >
+                      <div style={{ minWidth: 260, flex: "1 1 260px" }}>
+                        <label style={{ display: "block", marginBottom: 4, fontSize: 13 }}>
+                          主模型
+                          {defaultId === selectedAgent.id ? "（默认）" : ""}
+                        </label>
+                        <Select
+                          style={{ width: "100%" }}
+                          placeholder="继承默认"
+                          allowClear
+                          value={
+                            effectivePrimary === null
+                              ? "__inherit__"
+                              : effectivePrimary || undefined
+                          }
+                          disabled={!configSnapshot || config.loading || configSaving}
+                          options={[
+                            ...(defaultId !== selectedAgent.id && defaultPrimary
+                              ? [
+                                  {
+                                    value: "__inherit__",
+                                    label: `继承默认（${defaultPrimary}）`,
+                                  },
+                                ]
+                              : []),
+                            ...getConfiguredModelOptions(
+                              configSnapshot,
+                              effectivePrimary ?? null,
+                            ).map((o) => ({ value: o.value, label: o.label })),
+                          ]}
+                          onChange={(v) =>
+                            setOverviewModelPrimaryDraft(
+                              v === undefined || v === "__inherit__" ? null : v,
+                            )
+                          }
+                        />
+                      </div>
+                      <div style={{ minWidth: 260, flex: "1 1 260px" }}>
+                        <label style={{ display: "block", marginBottom: 4, fontSize: 13 }}>
+                          备用模型（逗号分隔）
+                        </label>
+                        <Input
+                          placeholder="provider/model, provider/model"
+                          value={fallbackText}
+                          disabled={!configSnapshot || config.loading || configSaving}
+                          onChange={(e) =>
+                            setOverviewModelFallbacksDraft(parseFallbackList(e.target.value))
+                          }
+                        />
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+                      <Button size="small" disabled={config.loading} onClick={handleConfigReload}>
+                        重载配置
+                      </Button>
+                      <Button
+                        type="primary"
+                        size="small"
+                        loading={configSaving}
+                        disabled={!overviewConfigDirty}
+                        onClick={() => void handleOverviewModelSave()}
+                      >
+                        {configSaving ? "保存中…" : "保存"}
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -441,17 +738,15 @@ export function AgentsPanel() {
                     }}
                   >
                     <div>
-                      <h3 className="agent-panel-title">Core Files</h3>
-                      <p className="agent-panel-sub">
-                        Bootstrap persona, identity, and tool guidance.
-                      </p>
+                      <h3 className="agent-panel-title">核心文件</h3>
+                      <p className="agent-panel-sub">引导人格、身份与工具说明。</p>
                     </div>
                     <Button
                       size="small"
                       loading={files.loading}
                       onClick={() => void files.refresh()}
                     >
-                      Refresh
+                      刷新
                     </Button>
                   </div>
                   {files.data?.agentId === activeAgentId && (
@@ -463,7 +758,7 @@ export function AgentsPanel() {
                         fontFamily: "var(--font-mono)",
                       }}
                     >
-                      Workspace: {files.data.workspace}
+                      工作区：{files.data.workspace}
                     </p>
                   )}
                   {files.error && (
@@ -498,7 +793,7 @@ export function AgentsPanel() {
                         style={{ minHeight: 280, display: "block" }}
                       >
                         {!activeFileName ? (
-                          <p className="agent-files-editor-placeholder">Select a file to edit.</p>
+                          <p className="agent-files-editor-placeholder">选择要编辑的文件。</p>
                         ) : fileLoading ? (
                           <Spin />
                         ) : (
@@ -525,7 +820,7 @@ export function AgentsPanel() {
                               </Typography.Text>
                               <span style={{ display: "flex", gap: 8 }}>
                                 <Button size="small" disabled={!isDirty} onClick={handleFileReset}>
-                                  Reset
+                                  重置
                                 </Button>
                                 <Button
                                   type="primary"
@@ -534,7 +829,7 @@ export function AgentsPanel() {
                                   disabled={!isDirty}
                                   onClick={() => void handleFileSave()}
                                 >
-                                  {fileSaving ? "Saving…" : "Save"}
+                                  {fileSaving ? "保存中…" : "保存"}
                                 </Button>
                               </span>
                             </div>
@@ -553,92 +848,215 @@ export function AgentsPanel() {
                     agentFiles.length === 0 &&
                     !files.loading && (
                       <p style={{ marginTop: 16, fontSize: 13, color: "rgba(15,23,42,0.55)" }}>
-                        No files found.
+                        未找到文件。
                       </p>
                     )}
                 </div>
               )}
 
               {activeTab === "tools" && (
-                <div className="agent-panel-card">
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      flexWrap: "wrap",
-                      gap: 12,
-                    }}
-                  >
-                    <div>
-                      <h3 className="agent-panel-title">Tool Access</h3>
-                      <p className="agent-panel-sub">
-                        Profile + per-tool overrides for this agent. 在「配置」页可修改 tools
-                        profile。
-                      </p>
-                    </div>
-                    <Button
-                      size="small"
-                      loading={tools.loading}
-                      onClick={() => void tools.refresh()}
-                    >
-                      刷新
-                    </Button>
-                  </div>
-                  {tools.error && (
-                    <Alert type="warning" message={tools.error} style={{ marginBottom: 12 }} />
-                  )}
-                  {(configSnapshot || tools.data) && (
+                <div className="agents-tools-wrap">
+                  {/* 卡片 1：工具访问 + 快捷预设 */}
+                  <div className="agent-panel-card">
                     <div
-                      className="agents-overview-grid"
-                      style={{ marginTop: 12, marginBottom: 16 }}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                        flexWrap: "wrap",
+                        gap: 12,
+                      }}
                     >
-                      <div className="agent-kv">
-                        <span className="agent-kv-label">Profile</span>
-                        <span className="agent-kv-value">
-                          {agentConfigEntry?.tools?.profile ?? configGlobalTools?.profile ?? "—"}
-                        </span>
+                      <div>
+                        <h3 className="agent-panel-title">工具访问</h3>
+                        <p className="agent-panel-sub">
+                          Profile + 本代理每工具覆盖。
+                          {totalToolCount > 0
+                            ? `${enabledToolCount}/${totalToolCount} 已启用。`
+                            : ""}
+                        </p>
                       </div>
-                      <div className="agent-kv">
-                        <span className="agent-kv-label">Source</span>
-                        <span className="agent-kv-value">
-                          {agentConfigEntry?.tools?.profile
-                            ? "agent override"
-                            : configGlobalTools?.profile
-                              ? "global default"
-                              : "default"}
-                        </span>
+                      <div
+                        style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}
+                      >
+                        <Button
+                          size="small"
+                          disabled={hasAgentAllow || !tools.data?.groups?.length}
+                          onClick={handleToolsEnableAll}
+                        >
+                          启用全部
+                        </Button>
+                        <Button
+                          size="small"
+                          disabled={hasAgentAllow || !tools.data?.groups?.length}
+                          onClick={handleToolsDisableAll}
+                        >
+                          禁用全部
+                        </Button>
+                        <Button size="small" loading={config.loading} onClick={handleConfigReload}>
+                          重载配置
+                        </Button>
+                        <Button
+                          type="primary"
+                          size="small"
+                          loading={configSaving}
+                          disabled={!toolsDirty || hasAgentAllow}
+                          onClick={() => void handleToolsSave()}
+                        >
+                          {configSaving ? "保存中…" : "保存"}
+                        </Button>
                       </div>
+                    </div>
+                    {tools.error && (
+                      <Alert
+                        type="warning"
+                        message={tools.error}
+                        style={{ marginTop: 12, marginBottom: 0 }}
+                      />
+                    )}
+                    {hasAgentAllow && (
+                      <Alert
+                        type="info"
+                        message="当前代理使用显式 allow 列表，此处不可编辑；请在配置中修改。"
+                        style={{ marginTop: 12, marginBottom: 0 }}
+                      />
+                    )}
+                    {(configSnapshot || tools.data) &&
+                      !hasAgentAllow &&
+                      (() => {
+                        const globalProfile =
+                          (configGlobalTools as { profile?: string } | undefined)?.profile ??
+                          "full";
+                        const toolsInherit =
+                          effectiveToolsProfile === globalProfile &&
+                          effectiveToolsAlsoAllow.length === 0 &&
+                          effectiveToolsDeny.length === 0;
+                        return (
+                          <div className="agents-overview-grid" style={{ marginTop: 12 }}>
+                            <div className="agent-kv">
+                              <span className="agent-kv-label">配置集</span>
+                              <span className="agent-kv-value">
+                                {toolsInherit ? "继承" : effectiveToolsProfile}
+                              </span>
+                            </div>
+                            <div className="agent-kv">
+                              <span className="agent-kv-label">来源</span>
+                              <span className="agent-kv-value">
+                                {(agentConfigEntry?.tools?.profile ?? toolsDraft?.profile)
+                                  ? "代理覆盖"
+                                  : (configGlobalTools as { profile?: string } | undefined)?.profile
+                                    ? "全局默认"
+                                    : "默认"}
+                              </span>
+                            </div>
+                            <div className="agent-kv">
+                              <span className="agent-kv-label">状态</span>
+                              <span className="agent-kv-value">
+                                {toolsDirty ? "未保存" : "已保存"}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    {/* 同卡内：快捷预设 */}
+                    {!hasAgentAllow &&
+                      (tools.data?.profiles?.length || DEFAULT_PROFILE_OPTIONS.length) > 0 && (
+                        <div style={{ marginTop: 20 }}>
+                          <Typography.Text strong style={{ display: "block", marginBottom: 12 }}>
+                            快捷预设
+                          </Typography.Text>
+                          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                            {profileOptionsFromApi.map((p) => (
+                              <Button
+                                key={p.id}
+                                size="small"
+                                type={effectiveToolsProfile === p.id ? "primary" : "default"}
+                                onClick={() => handleToolsPreset(p.id)}
+                              >
+                                {p.label}
+                              </Button>
+                            ))}
+                            <Button
+                              size="small"
+                              type={
+                                effectiveToolsProfile ===
+                                  ((configGlobalTools as { profile?: string } | undefined)
+                                    ?.profile ?? "full") &&
+                                effectiveToolsAlsoAllow.length === 0 &&
+                                effectiveToolsDeny.length === 0
+                                  ? "primary"
+                                  : "default"
+                              }
+                              onClick={() => handleToolsPreset("inherit")}
+                            >
+                              继承
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                  </div>
+
+                  {/* 每个工具分类单独一张卡片 */}
+                  {tools.data?.groups &&
+                    tools.data.groups.length > 0 &&
+                    tools.data.groups.map((group) => (
+                      <div key={group.id} className="agent-panel-card">
+                        <Typography.Text strong style={{ display: "block", marginBottom: 12 }}>
+                          {group.label}
+                        </Typography.Text>
+                        <div className="agents-tools-group-grid">
+                          {(group.tools ?? []).map((tool) => {
+                            const { allowed } = isToolAllowed({
+                              toolId: tool.id,
+                              profile: effectiveToolsProfile,
+                              defaultProfiles: tool.defaultProfiles,
+                              alsoAllow: effectiveToolsAlsoAllow,
+                              deny: effectiveToolsDeny,
+                            });
+                            const sourceLabel =
+                              (group as { source?: string }).source === "plugin"
+                                ? "plugin"
+                                : "core";
+                            return (
+                              <div key={tool.id} className="agents-tool-item-card">
+                                <div style={{ minWidth: 0, flex: 1 }}>
+                                  <div style={{ fontSize: 13 }}>
+                                    <code style={{ marginRight: 6 }}>{tool.id}</code>
+                                    <Tag style={{ fontSize: 11 }}>{sourceLabel}</Tag>
+                                  </div>
+                                  <div
+                                    style={{
+                                      color: "rgba(15,23,42,0.55)",
+                                      fontSize: 12,
+                                      marginTop: 2,
+                                    }}
+                                  >
+                                    {tool.description ?? tool.label ?? tool.id}
+                                  </div>
+                                </div>
+                                <Switch
+                                  size="small"
+                                  checked={allowed}
+                                  disabled={hasAgentAllow}
+                                  onChange={(checked) => handleToolToggle(tool.id, checked)}
+                                />
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+
+                  {tools.data && !tools.data.groups?.length && !tools.loading && (
+                    <div className="agent-panel-card">
+                      <JsonBlock value={tools.data} height={280} />
                     </div>
                   )}
-                  {tools.data?.groups && tools.data.groups.length > 0 ? (
-                    <div style={{ marginTop: 16 }}>
-                      {tools.data.groups.map((group) => (
-                        <div key={group.id} style={{ marginBottom: 20 }}>
-                          <Typography.Text strong style={{ display: "block", marginBottom: 8 }}>
-                            {group.label}
-                          </Typography.Text>
-                          <ul style={{ margin: 0, paddingLeft: 20 }}>
-                            {(group.tools ?? []).map((tool) => (
-                              <li key={tool.id}>
-                                <code>{tool.label ?? tool.id}</code>
-                                {tool.description && (
-                                  <span style={{ color: "rgba(15,23,42,0.55)", marginLeft: 8 }}>
-                                    {tool.description}
-                                  </span>
-                                )}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
+                  {!tools.data && !tools.loading && (
+                    <div className="agent-panel-card">
+                      <Empty description="暂无工具目录" />
                     </div>
-                  ) : tools.data && !tools.loading ? (
-                    <div style={{ marginTop: 16 }}>
-                      <JsonBlock value={tools.data} height={360} />
-                    </div>
-                  ) : null}
-                  {!tools.data && !tools.loading && <Empty description="暂无工具目录" />}
+                  )}
                 </div>
               )}
 
@@ -675,7 +1093,7 @@ export function AgentsPanel() {
                       dataSource={skills.data.skills}
                       columns={[
                         {
-                          title: "名称",
+                          title: "技能名称",
                           dataIndex: "name",
                           key: "name",
                           render: (name: string) => (
@@ -726,7 +1144,7 @@ export function AgentsPanel() {
                     }}
                   >
                     <div>
-                      <h3 className="agent-panel-title">Channels</h3>
+                      <h3 className="agent-panel-title">通道</h3>
                       <p className="agent-panel-sub">网关通道状态快照。</p>
                     </div>
                     <Button
@@ -764,7 +1182,7 @@ export function AgentsPanel() {
                           title: "账户",
                           key: "accounts",
                           render: (_: unknown, r: { total: number; connected: number }) =>
-                            `${r.connected}/${r.total} connected`,
+                            `${r.connected}/${r.total} 已连接`,
                         },
                       ]}
                       pagination={false}
@@ -787,7 +1205,7 @@ export function AgentsPanel() {
                     }}
                   >
                     <div>
-                      <h3 className="agent-panel-title">Cron Jobs</h3>
+                      <h3 className="agent-panel-title">定时任务</h3>
                       <p className="agent-panel-sub">针对当前代理的定时任务。</p>
                     </div>
                     <Button size="small" loading={cron.loading} onClick={() => void cron.refresh()}>
@@ -800,15 +1218,15 @@ export function AgentsPanel() {
                       style={{ marginTop: 12, marginBottom: 16 }}
                     >
                       <div className="agent-kv">
-                        <span className="agent-kv-label">Enabled</span>
-                        <span className="agent-kv-value">{cronStatus.enabled ? "Yes" : "No"}</span>
+                        <span className="agent-kv-label">已启用</span>
+                        <span className="agent-kv-value">{cronStatus.enabled ? "是" : "否"}</span>
                       </div>
                       <div className="agent-kv">
-                        <span className="agent-kv-label">Jobs</span>
+                        <span className="agent-kv-label">任务数</span>
                         <span className="agent-kv-value">{cronStatus.jobs ?? "—"}</span>
                       </div>
                       <div className="agent-kv">
-                        <span className="agent-kv-label">Next wake</span>
+                        <span className="agent-kv-label">下次唤醒</span>
                         <span className="agent-kv-value">
                           {formatNextRun(cronStatus.nextWakeAtMs)}
                         </span>
@@ -816,7 +1234,7 @@ export function AgentsPanel() {
                     </div>
                   )}
                   <Typography.Text strong style={{ display: "block", marginBottom: 8 }}>
-                    本代理任务
+                    本代理定时任务
                   </Typography.Text>
                   {cronJobsForAgent.length > 0 ? (
                     <Table
@@ -830,9 +1248,9 @@ export function AgentsPanel() {
                           key: "enabled",
                           render: (_: unknown, j: CronJob) =>
                             j.enabled !== false ? (
-                              <Tag color="green">enabled</Tag>
+                              <Tag color="green">已启用</Tag>
                             ) : (
-                              <Tag color="default">disabled</Tag>
+                              <Tag color="default">已禁用</Tag>
                             ),
                         },
                         {

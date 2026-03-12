@@ -1,13 +1,22 @@
 "use client";
 
-import { Button, Empty, Spin } from "antd";
-import { useCallback, useState } from "react";
+import { Alert, Button, Empty, Input, Spin, Switch, Table, Tag, Typography } from "antd";
+import { useCallback, useEffect, useState } from "react";
+import {
+  resolveAgentConfig,
+  resolveModelLabel,
+} from "@/components/openclaw/panels/agents-config-utils";
 import { JsonBlock } from "@/components/openclaw/panels/dashboard-utils";
 import { useGatewayQuery } from "@/components/openclaw/panels/use-gateway-query";
 import { useGateway } from "@/components/openclaw/providers/gateway-provider";
 import type {
   AgentsFilesListResult,
   AgentsListResult,
+  ChannelsStatusSnapshot,
+  ConfigSnapshot,
+  CronJob,
+  CronStatus,
+  SkillStatusReport,
   ToolsCatalogResult,
 } from "@/components/openclaw/types";
 
@@ -63,11 +72,32 @@ function formatRelative(ms?: number) {
   return `${Math.floor(d / 86400_000)} 天前`;
 }
 
+function formatNextRun(ms?: number | null) {
+  if (ms == null || !Number.isFinite(ms)) {
+    return "—";
+  }
+  const d = new Date(ms);
+  return d.toLocaleString("zh-CN");
+}
+
 export function AgentsPanel() {
   const { request, connected } = useGateway();
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<AgentsPanelTab>("overview");
   const [activeFileName, setActiveFileName] = useState<string | null>(null);
+  const [fileContents, setFileContents] = useState<Record<string, string>>({});
+  const [fileDrafts, setFileDrafts] = useState<Record<string, string>>({});
+  const [fileLoading, setFileLoading] = useState(false);
+  const [fileSaving, setFileSaving] = useState(false);
+  const [fileLoadError, setFileLoadError] = useState<string | null>(null);
+
+  // 切换代理时清空文件缓存，避免串数据（用 selectedAgentId，因其在 activeAgentId 之前已定义）
+  useEffect(() => {
+    setFileContents({});
+    setFileDrafts({});
+    setActiveFileName(null);
+    setFileLoadError(null);
+  }, [selectedAgentId]);
 
   const agents = useGatewayQuery<AgentsListResult>(
     useCallback(async () => await request<AgentsListResult>("agents.list", {}), [request]),
@@ -79,6 +109,11 @@ export function AgentsPanel() {
   const selectedAgent = activeAgentId
     ? ((agents.data?.agents ?? []).find((a) => a.id === activeAgentId) ?? null)
     : null;
+
+  const config = useGatewayQuery<ConfigSnapshot>(
+    useCallback(async () => await request<ConfigSnapshot>("config.get", {}), [request]),
+    connected && Boolean(activeAgentId),
+  );
 
   const files = useGatewayQuery<AgentsFilesListResult | null>(
     useCallback(
@@ -105,8 +140,143 @@ export function AgentsPanel() {
     connected && Boolean(activeAgentId),
   );
 
+  const skills = useGatewayQuery<SkillStatusReport>(
+    useCallback(
+      async () =>
+        await request<SkillStatusReport>("skills.status", {
+          agentId: activeAgentId ?? undefined,
+        }),
+      [activeAgentId, request],
+    ),
+    connected && Boolean(activeAgentId),
+  );
+
+  const channels = useGatewayQuery<ChannelsStatusSnapshot>(
+    useCallback(
+      async () =>
+        await request<ChannelsStatusSnapshot>("channels.status", {
+          probe: false,
+          timeoutMs: 5000,
+        }),
+      [request],
+    ),
+    connected && activeTab === "channels",
+  );
+
+  const cron = useGatewayQuery<[CronStatus | null, { jobs?: CronJob[] }]>(
+    useCallback(async () => {
+      const [status, list] = await Promise.all([
+        request<CronStatus>("cron.status", {}),
+        request<{ jobs?: CronJob[] }>("cron.list", {
+          includeDisabled: true,
+          limit: 100,
+          offset: 0,
+          enabled: "all",
+          sortBy: "nextRunAtMs",
+          sortDir: "asc",
+        }),
+      ]);
+      return [status, list];
+    }, [request]),
+    connected && activeTab === "cron",
+  );
+
   const agentFiles = files.data?.agentId === activeAgentId ? (files.data.files ?? []) : [];
   const defaultId = agents.data?.defaultId ?? null;
+  const configSnapshot = config.data;
+  const {
+    entry: agentConfigEntry,
+    defaults: configDefaults,
+    globalTools: configGlobalTools,
+  } = resolveAgentConfig(configSnapshot, activeAgentId ?? "");
+  const workspaceFromFiles = files.data?.agentId === activeAgentId ? files.data.workspace : null;
+  const workspace =
+    workspaceFromFiles ??
+    agentConfigEntry?.workspace ??
+    (configDefaults as { workspace?: string } | undefined)?.workspace ??
+    "—";
+  const primaryModel = resolveModelLabel(agentConfigEntry?.model ?? configDefaults?.model);
+  const identityName =
+    (selectedAgent?.name?.trim() ||
+      selectedAgent?.identity?.name?.trim() ||
+      agentConfigEntry?.name) ??
+    selectedAgent?.id ??
+    "—";
+  const identityEmoji = resolveAgentEmoji(selectedAgent ?? {}) || "—";
+  const skillsFilter = Array.isArray(agentConfigEntry?.skills)
+    ? `${agentConfigEntry.skills.length} selected`
+    : "all skills";
+
+  // 选中文件时加载内容
+  useEffect(() => {
+    if (!activeAgentId || !activeFileName || !connected) {
+      return;
+    }
+    if (Object.hasOwn(fileContents, activeFileName)) {
+      return;
+    }
+    setFileLoadError(null);
+    setFileLoading(true);
+    request<{ file?: { content?: string } }>("agents.files.get", {
+      agentId: activeAgentId,
+      name: activeFileName,
+    })
+      .then((res) => {
+        const content = res?.file?.content ?? "";
+        setFileContents((prev) => ({ ...prev, [activeFileName]: content }));
+        setFileDrafts((prev) => ({ ...prev, [activeFileName]: content }));
+      })
+      .catch((err) => setFileLoadError(String(err)))
+      .finally(() => setFileLoading(false));
+  }, [activeAgentId, activeFileName, connected, request, fileContents]);
+
+  const activeContent = activeFileName ? (fileContents[activeFileName] ?? "") : "";
+  const activeDraft = activeFileName ? (fileDrafts[activeFileName] ?? activeContent) : "";
+  const isDirty = activeFileName ? activeDraft !== activeContent : false;
+
+  const handleFileDraftChange = useCallback(
+    (value: string) => {
+      if (!activeFileName) {
+        return;
+      }
+      setFileDrafts((prev) => ({ ...prev, [activeFileName]: value }));
+    },
+    [activeFileName],
+  );
+
+  const handleFileReset = useCallback(() => {
+    if (!activeFileName) {
+      return;
+    }
+    setFileDrafts((prev) => ({ ...prev, [activeFileName]: activeContent }));
+  }, [activeFileName, activeContent]);
+
+  const handleFileSave = useCallback(async () => {
+    if (!activeAgentId || !activeFileName || !connected || fileSaving) {
+      return;
+    }
+    setFileSaving(true);
+    setFileLoadError(null);
+    try {
+      await request("agents.files.set", {
+        agentId: activeAgentId,
+        name: activeFileName,
+        content: activeDraft,
+      });
+      setFileContents((prev) => ({ ...prev, [activeFileName]: activeDraft }));
+      setFileDrafts((prev) => ({ ...prev, [activeFileName]: activeDraft }));
+    } catch (err) {
+      setFileLoadError(String(err));
+    } finally {
+      setFileSaving(false);
+    }
+  }, [activeAgentId, activeFileName, activeDraft, connected, request, fileSaving]);
+
+  const cronStatus = cron.data?.[0] ?? null;
+  const cronJobsRaw = cron.data?.[1]?.jobs ?? [];
+  const cronJobsForAgent = activeAgentId
+    ? cronJobsRaw.filter((j) => (j.agentId ?? null) === activeAgentId)
+    : [];
 
   const tabs: Array<{ key: AgentsPanelTab; label: string }> = [
     { key: "overview", label: "Overview" },
@@ -117,10 +287,18 @@ export function AgentsPanel() {
     { key: "cron", label: "Cron Jobs" },
   ];
 
+  const channelIds = channels.data
+    ? Array.from(
+        new Set([
+          ...(channels.data.channelOrder ?? []),
+          ...Object.keys(channels.data.channelAccounts ?? {}),
+        ]),
+      )
+    : [];
+
   return (
     <div className="agents-page-wrap">
       <div className="agents-layout">
-        {/* 左侧：代理列表 */}
         <aside className="agents-sidebar">
           <div className="agents-sidebar-header">
             <div>
@@ -168,7 +346,6 @@ export function AgentsPanel() {
           </div>
         </aside>
 
-        {/* 右侧：详情 */}
         <main className="agents-main">
           {!selectedAgent ? (
             <div className="agent-panel-card">
@@ -177,7 +354,6 @@ export function AgentsPanel() {
             </div>
           ) : (
             <>
-              {/* 代理头部 */}
               <div className="agent-header-card">
                 <div className="agent-header-main">
                   <div className="agent-header-avatar">
@@ -205,7 +381,6 @@ export function AgentsPanel() {
                 </div>
               </div>
 
-              {/* 标签页 */}
               <div className="agent-tabs">
                 {tabs.map((tab) => (
                   <button
@@ -219,34 +394,38 @@ export function AgentsPanel() {
                 ))}
               </div>
 
-              {/* 内容区 */}
               {activeTab === "overview" && (
                 <div className="agent-panel-card">
                   <h3 className="agent-panel-title">Overview</h3>
                   <p className="agent-panel-sub">工作区路径与身份信息。</p>
-                  {files.data?.agentId === activeAgentId && (
-                    <div className="agents-overview-grid" style={{ marginTop: 16 }}>
-                      <div className="agent-kv">
-                        <span className="agent-kv-label">Workspace</span>
-                        <span className="agent-kv-value">{files.data.workspace}</span>
-                      </div>
-                      <div className="agent-kv">
-                        <span className="agent-kv-label">Agent ID</span>
-                        <span className="agent-kv-value">{selectedAgent.id}</span>
-                      </div>
-                      <div className="agent-kv">
-                        <span className="agent-kv-label">Default</span>
-                        <span className="agent-kv-value">
-                          {defaultId === selectedAgent.id ? "yes" : "no"}
-                        </span>
-                      </div>
+                  <div className="agents-overview-grid" style={{ marginTop: 16 }}>
+                    <div className="agent-kv">
+                      <span className="agent-kv-label">Workspace</span>
+                      <span className="agent-kv-value">{workspace}</span>
                     </div>
-                  )}
-                  {files.data?.agentId !== activeAgentId && !files.loading && (
-                    <p style={{ margin: 0, fontSize: 13, color: "rgba(15,23,42,0.55)" }}>
-                      刷新或切换到 Files 可加载工作区路径。
-                    </p>
-                  )}
+                    <div className="agent-kv">
+                      <span className="agent-kv-label">Primary Model</span>
+                      <span className="agent-kv-value">{primaryModel}</span>
+                    </div>
+                    <div className="agent-kv">
+                      <span className="agent-kv-label">Identity Name</span>
+                      <span className="agent-kv-value">{identityName}</span>
+                    </div>
+                    <div className="agent-kv">
+                      <span className="agent-kv-label">Default</span>
+                      <span className="agent-kv-value">
+                        {defaultId === selectedAgent.id ? "yes" : "no"}
+                      </span>
+                    </div>
+                    <div className="agent-kv">
+                      <span className="agent-kv-label">Identity Emoji</span>
+                      <span className="agent-kv-value">{identityEmoji}</span>
+                    </div>
+                    <div className="agent-kv">
+                      <span className="agent-kv-label">Skills Filter</span>
+                      <span className="agent-kv-value">{skillsFilter}</span>
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -288,11 +467,11 @@ export function AgentsPanel() {
                     </p>
                   )}
                   {files.error && (
-                    <p style={{ fontSize: 13, color: "var(--ant-color-error)" }}>{files.error}</p>
+                    <Alert type="error" message={files.error} style={{ marginBottom: 12 }} />
                   )}
                   {!files.data && !files.loading && activeAgentId && (
                     <p style={{ fontSize: 13, color: "rgba(15,23,42,0.55)" }}>
-                      加载代理工作区文件以编辑核心说明。
+                      点击 Refresh 加载代理工作区文件列表。
                     </p>
                   )}
                   {files.data?.agentId === activeAgentId && agentFiles.length > 0 && (
@@ -314,13 +493,58 @@ export function AgentsPanel() {
                           </button>
                         ))}
                       </div>
-                      <div className="agent-files-editor">
-                        {activeFileName ? (
-                          <p className="agent-files-editor-placeholder">
-                            文件编辑功能可在后续接入 agents.files.get / agents.files.set。
-                          </p>
-                        ) : (
+                      <div
+                        className="agent-files-editor"
+                        style={{ minHeight: 280, display: "block" }}
+                      >
+                        {!activeFileName ? (
                           <p className="agent-files-editor-placeholder">Select a file to edit.</p>
+                        ) : fileLoading ? (
+                          <Spin />
+                        ) : (
+                          <>
+                            {fileLoadError && (
+                              <Alert
+                                type="error"
+                                message={fileLoadError}
+                                style={{ marginBottom: 12 }}
+                              />
+                            )}
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                flexWrap: "wrap",
+                                gap: 8,
+                                marginBottom: 12,
+                              }}
+                            >
+                              <Typography.Text strong code>
+                                {activeFileName}
+                              </Typography.Text>
+                              <span style={{ display: "flex", gap: 8 }}>
+                                <Button size="small" disabled={!isDirty} onClick={handleFileReset}>
+                                  Reset
+                                </Button>
+                                <Button
+                                  type="primary"
+                                  size="small"
+                                  loading={fileSaving}
+                                  disabled={!isDirty}
+                                  onClick={() => void handleFileSave()}
+                                >
+                                  {fileSaving ? "Saving…" : "Save"}
+                                </Button>
+                              </span>
+                            </div>
+                            <Input.TextArea
+                              value={activeDraft}
+                              onChange={(e) => handleFileDraftChange(e.target.value)}
+                              rows={14}
+                              style={{ fontFamily: "var(--font-mono)", fontSize: 13 }}
+                            />
+                          </>
                         )}
                       </div>
                     </div>
@@ -332,7 +556,6 @@ export function AgentsPanel() {
                         No files found.
                       </p>
                     )}
-                  {files.loading && <Spin size="small" />}
                 </div>
               )}
 
@@ -348,8 +571,11 @@ export function AgentsPanel() {
                     }}
                   >
                     <div>
-                      <h3 className="agent-panel-title">工具目录</h3>
-                      <p className="agent-panel-sub">当前代理可用的工具列表。</p>
+                      <h3 className="agent-panel-title">Tool Access</h3>
+                      <p className="agent-panel-sub">
+                        Profile + per-tool overrides for this agent. 在「配置」页可修改 tools
+                        profile。
+                      </p>
                     </div>
                     <Button
                       size="small"
@@ -359,37 +585,268 @@ export function AgentsPanel() {
                       刷新
                     </Button>
                   </div>
-                  {tools.loading && <Spin size="small" />}
                   {tools.error && (
-                    <p style={{ fontSize: 13, color: "var(--ant-color-error)" }}>{tools.error}</p>
+                    <Alert type="warning" message={tools.error} style={{ marginBottom: 12 }} />
                   )}
-                  {tools.data && !tools.loading && (
+                  {(configSnapshot || tools.data) && (
+                    <div
+                      className="agents-overview-grid"
+                      style={{ marginTop: 12, marginBottom: 16 }}
+                    >
+                      <div className="agent-kv">
+                        <span className="agent-kv-label">Profile</span>
+                        <span className="agent-kv-value">
+                          {agentConfigEntry?.tools?.profile ?? configGlobalTools?.profile ?? "—"}
+                        </span>
+                      </div>
+                      <div className="agent-kv">
+                        <span className="agent-kv-label">Source</span>
+                        <span className="agent-kv-value">
+                          {agentConfigEntry?.tools?.profile
+                            ? "agent override"
+                            : configGlobalTools?.profile
+                              ? "global default"
+                              : "default"}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  {tools.data?.groups && tools.data.groups.length > 0 ? (
+                    <div style={{ marginTop: 16 }}>
+                      {tools.data.groups.map((group) => (
+                        <div key={group.id} style={{ marginBottom: 20 }}>
+                          <Typography.Text strong style={{ display: "block", marginBottom: 8 }}>
+                            {group.label}
+                          </Typography.Text>
+                          <ul style={{ margin: 0, paddingLeft: 20 }}>
+                            {(group.tools ?? []).map((tool) => (
+                              <li key={tool.id}>
+                                <code>{tool.label ?? tool.id}</code>
+                                {tool.description && (
+                                  <span style={{ color: "rgba(15,23,42,0.55)", marginLeft: 8 }}>
+                                    {tool.description}
+                                  </span>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  ) : tools.data && !tools.loading ? (
                     <div style={{ marginTop: 16 }}>
                       <JsonBlock value={tools.data} height={360} />
                     </div>
-                  )}
+                  ) : null}
                   {!tools.data && !tools.loading && <Empty description="暂无工具目录" />}
                 </div>
               )}
 
               {activeTab === "skills" && (
                 <div className="agent-panel-card">
-                  <h3 className="agent-panel-title">Skills</h3>
-                  <p className="agent-panel-sub">技能状态与启停（占位，后续接入 API）。</p>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      flexWrap: "wrap",
+                      gap: 12,
+                    }}
+                  >
+                    <div>
+                      <h3 className="agent-panel-title">Skills</h3>
+                      <p className="agent-panel-sub">当前代理工作区技能状态。</p>
+                    </div>
+                    <Button
+                      size="small"
+                      loading={skills.loading}
+                      onClick={() => void skills.refresh()}
+                    >
+                      刷新
+                    </Button>
+                  </div>
+                  {skills.error && (
+                    <Alert type="error" message={skills.error} style={{ marginBottom: 12 }} />
+                  )}
+                  {skills.data?.skills?.length ? (
+                    <Table
+                      size="small"
+                      rowKey={(r) => r.id ?? r.name}
+                      dataSource={skills.data.skills}
+                      columns={[
+                        {
+                          title: "名称",
+                          dataIndex: "name",
+                          key: "name",
+                          render: (name: string) => (
+                            <Typography.Text strong>{name}</Typography.Text>
+                          ),
+                        },
+                        {
+                          title: "状态",
+                          dataIndex: "status",
+                          key: "status",
+                          render: (s: string) => (s ? <Tag>{s}</Tag> : "—"),
+                        },
+                        {
+                          title: "启用",
+                          dataIndex: "enabled",
+                          key: "enabled",
+                          render: (enabled: boolean, record: { name: string }) => (
+                            <Switch
+                              checked={enabled}
+                              onChange={async (checked) => {
+                                await request("skills.update", {
+                                  skillKey: record.name,
+                                  enabled: checked,
+                                });
+                                await skills.refresh();
+                              }}
+                            />
+                          ),
+                        },
+                      ]}
+                      pagination={false}
+                    />
+                  ) : (
+                    !skills.loading && <Empty description="暂无技能或未加载" />
+                  )}
                 </div>
               )}
 
               {activeTab === "channels" && (
                 <div className="agent-panel-card">
-                  <h3 className="agent-panel-title">Channels</h3>
-                  <p className="agent-panel-sub">通道状态（占位，后续接入 API）。</p>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      flexWrap: "wrap",
+                      gap: 12,
+                    }}
+                  >
+                    <div>
+                      <h3 className="agent-panel-title">Channels</h3>
+                      <p className="agent-panel-sub">网关通道状态快照。</p>
+                    </div>
+                    <Button
+                      size="small"
+                      loading={channels.loading}
+                      onClick={() => void channels.refresh()}
+                    >
+                      刷新
+                    </Button>
+                  </div>
+                  {channels.error && (
+                    <Alert type="error" message={channels.error} style={{ marginBottom: 12 }} />
+                  )}
+                  {channels.data && channelIds.length > 0 ? (
+                    <Table
+                      size="small"
+                      rowKey="id"
+                      dataSource={channelIds.map((id) => {
+                        const meta = channels.data?.channelMeta?.find((m) => m.id === id);
+                        const label = meta?.label ?? channels.data?.channelLabels?.[id] ?? id;
+                        const accounts = channels.data?.channelAccounts?.[id] ?? [];
+                        const connected = accounts.filter(
+                          (a) => a.connected === true || a.running === true,
+                        ).length;
+                        return {
+                          id,
+                          label,
+                          total: accounts.length,
+                          connected,
+                        };
+                      })}
+                      columns={[
+                        { title: "通道", dataIndex: "label", key: "label" },
+                        {
+                          title: "账户",
+                          key: "accounts",
+                          render: (_: unknown, r: { total: number; connected: number }) =>
+                            `${r.connected}/${r.total} connected`,
+                        },
+                      ]}
+                      pagination={false}
+                    />
+                  ) : (
+                    !channels.loading && <Empty description="暂无通道或未加载" />
+                  )}
                 </div>
               )}
 
               {activeTab === "cron" && (
                 <div className="agent-panel-card">
-                  <h3 className="agent-panel-title">Cron Jobs</h3>
-                  <p className="agent-panel-sub">定时任务（占位，后续接入 API）。</p>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      flexWrap: "wrap",
+                      gap: 12,
+                    }}
+                  >
+                    <div>
+                      <h3 className="agent-panel-title">Cron Jobs</h3>
+                      <p className="agent-panel-sub">针对当前代理的定时任务。</p>
+                    </div>
+                    <Button size="small" loading={cron.loading} onClick={() => void cron.refresh()}>
+                      刷新
+                    </Button>
+                  </div>
+                  {cronStatus && (
+                    <div
+                      className="agents-overview-grid"
+                      style={{ marginTop: 12, marginBottom: 16 }}
+                    >
+                      <div className="agent-kv">
+                        <span className="agent-kv-label">Enabled</span>
+                        <span className="agent-kv-value">{cronStatus.enabled ? "Yes" : "No"}</span>
+                      </div>
+                      <div className="agent-kv">
+                        <span className="agent-kv-label">Jobs</span>
+                        <span className="agent-kv-value">{cronStatus.jobs ?? "—"}</span>
+                      </div>
+                      <div className="agent-kv">
+                        <span className="agent-kv-label">Next wake</span>
+                        <span className="agent-kv-value">
+                          {formatNextRun(cronStatus.nextWakeAtMs)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  <Typography.Text strong style={{ display: "block", marginBottom: 8 }}>
+                    本代理任务
+                  </Typography.Text>
+                  {cronJobsForAgent.length > 0 ? (
+                    <Table
+                      size="small"
+                      rowKey="id"
+                      dataSource={cronJobsForAgent}
+                      columns={[
+                        { title: "名称", dataIndex: "name", key: "name" },
+                        {
+                          title: "状态",
+                          key: "enabled",
+                          render: (_: unknown, j: CronJob) =>
+                            j.enabled !== false ? (
+                              <Tag color="green">enabled</Tag>
+                            ) : (
+                              <Tag color="default">disabled</Tag>
+                            ),
+                        },
+                        {
+                          title: "下次运行",
+                          key: "nextRun",
+                          render: (_: unknown, j: CronJob) =>
+                            formatNextRun(j.state?.nextRunAtMs ?? null),
+                        },
+                      ]}
+                      pagination={false}
+                    />
+                  ) : (
+                    !cron.loading && <Empty description="暂无针对此代理的定时任务" />
+                  )}
                 </div>
               )}
             </>

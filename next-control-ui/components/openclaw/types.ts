@@ -289,3 +289,27 @@ export type LogsTailPayload = {
   truncated?: boolean;
   reset?: boolean;
 };
+
+export type CronStatus = {
+  enabled: boolean;
+  jobs: number;
+  nextWakeAtMs?: number | null;
+};
+
+export type CronJob = {
+  id: string;
+  name: string;
+  description?: string;
+  agentId?: string | null;
+  enabled?: boolean;
+  sessionTarget?: string;
+  state?: {
+    nextRunAtMs?: number;
+    lastRunAtMs?: number;
+    lastStatus?: string;
+    lastError?: string;
+  };
+  schedule?: unknown;
+  payload?: unknown;
+  [key: string]: unknown;
+};

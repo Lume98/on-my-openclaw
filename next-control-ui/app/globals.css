@@ -1350,6 +1350,36 @@ html[data-theme="dark"] .control-nav-menu-wrapper::-webkit-scrollbar-thumb:hover
   margin: 0 0 16px;
 }
 
+.agent-panel-mono {
+  font-family: var(--font-mono), monospace;
+}
+
+.agent-panel-muted {
+  color: rgba(15, 23, 42, 0.55);
+}
+
+.agent-panel-filter-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: rgba(15, 23, 42, 0.75);
+}
+
+.agent-panel-filter-label span {
+  flex-shrink: 0;
+}
+
+.agent-skills-groups.ant-collapse-ghost .ant-collapse-header {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(15, 23, 42, 0.85);
+}
+
+.agent-skills-groups .agent-skills-list .agent-skill-row:last-child {
+  border-bottom: none;
+}
+
 .agents-tools-wrap {
   display: flex;
   flex-direction: column;

@@ -1,6 +1,18 @@
 "use client";
 
-import { Alert, Button, Empty, Input, Select, Spin, Switch, Table, Tag, Typography } from "antd";
+import {
+  Alert,
+  Button,
+  Collapse,
+  Empty,
+  Input,
+  Select,
+  Spin,
+  Switch,
+  Table,
+  Tag,
+  Typography,
+} from "antd";
 import { useCallback, useEffect, useState } from "react";
 import {
   getConfiguredModelOptions,
@@ -11,6 +23,7 @@ import {
   resolveModelPrimary,
 } from "@/components/openclaw/panels/agents-config-utils";
 import { JsonBlock } from "@/components/openclaw/panels/dashboard-utils";
+import { computeSkillMissing, groupSkills } from "@/components/openclaw/panels/skills-utils";
 import {
   DEFAULT_PROFILE_OPTIONS,
   isToolAllowed,
@@ -25,7 +38,6 @@ import type {
   CronJob,
   CronStatus,
   SkillStatusReport,
-  ToolCatalogProfileId,
   ToolsCatalogResult,
 } from "@/components/openclaw/types";
 
@@ -108,8 +120,15 @@ export function AgentsPanel() {
   >(undefined);
   type ToolsDraft = { profile?: string | null; alsoAllow?: string[]; deny?: string[] };
   const [toolsDraft, setToolsDraft] = useState<ToolsDraft | null>(null);
+  /** 技能允许列表草稿：null=未编辑，undefined=全部启用（无 allowlist），string[]=当前 allowlist */
+  const [skillsDraft, setSkillsDraft] = useState<string[] | undefined | null>(null);
+  const [skillsSearchFilter, setSkillsSearchFilter] = useState("");
+  /** 技能分组折叠的 activeKey，undefined 表示使用默认（仅第一组展开） */
+  const [skillsGroupsActiveKey, setSkillsGroupsActiveKey] = useState<string[] | undefined>(
+    undefined,
+  );
 
-  // 切换代理时清空文件缓存与 Overview/Tools 草稿
+  // 切换代理时清空文件缓存与 Overview/Tools/Skills 草稿
   useEffect(() => {
     setFileContents({});
     setFileDrafts({});
@@ -118,6 +137,8 @@ export function AgentsPanel() {
     setOverviewModelPrimaryDraft(undefined);
     setOverviewModelFallbacksDraft(undefined);
     setToolsDraft(null);
+    setSkillsDraft(null);
+    setSkillsSearchFilter("");
   }, [selectedAgentId]);
 
   const agents = useGatewayQuery<AgentsListResult>(
@@ -169,7 +190,7 @@ export function AgentsPanel() {
         }),
       [activeAgentId, request],
     ),
-    connected && Boolean(activeAgentId),
+    connected && Boolean(activeAgentId) && activeTab === "skills",
   );
 
   const channels = useGatewayQuery<ChannelsStatusSnapshot>(
@@ -490,6 +511,84 @@ export function AgentsPanel() {
     effectiveToolsDeny,
   ]);
 
+  const skillsAllowlist = agentConfigEntry?.skills;
+  const rawSkills = skills.data?.skills ?? [];
+  const allSkillNames = rawSkills.map((s) => s.name).filter(Boolean);
+  const effectiveSkillsAllowlist = skillsDraft !== null ? skillsDraft : skillsAllowlist;
+  const effectiveAllowSet =
+    effectiveSkillsAllowlist === undefined
+      ? new Set(allSkillNames)
+      : new Set(
+          Array.isArray(effectiveSkillsAllowlist)
+            ? effectiveSkillsAllowlist.map((n) => String(n).trim()).filter(Boolean)
+            : [],
+        );
+  const skillsEditable = Boolean(configSnapshot) && !config.loading && !configSaving;
+  const skillsDirty =
+    skillsDraft !== null &&
+    (skillsDraft === undefined
+      ? skillsAllowlist !== undefined
+      : JSON.stringify([...(skillsDraft ?? [])].toSorted()) !==
+        JSON.stringify([...(skillsAllowlist ?? [])].toSorted()));
+
+  const handleSkillsUseAll = useCallback(() => {
+    setSkillsDraft(undefined);
+  }, []);
+
+  const handleSkillsDisableAll = useCallback(() => {
+    setSkillsDraft([]);
+  }, []);
+
+  const handleSkillToggle = useCallback(
+    (skillName: string, enabled: boolean) => {
+      const base =
+        skillsDraft !== null
+          ? skillsDraft === undefined
+            ? allSkillNames
+            : skillsDraft
+          : (skillsAllowlist ?? allSkillNames);
+      const next = new Set(base.map((n) => String(n).trim()).filter(Boolean));
+      const name = skillName.trim();
+      if (!name) {
+        return;
+      }
+      if (enabled) {
+        next.add(name);
+      } else {
+        next.delete(name);
+      }
+      const arr = [...next];
+      setSkillsDraft(arr.length === allSkillNames.length ? undefined : arr);
+    },
+    [skillsDraft, skillsAllowlist, allSkillNames],
+  );
+
+  const handleSkillsSave = useCallback(async () => {
+    if (!activeAgentId || !configSnapshot?.hash || !connected || configSaving) {
+      return;
+    }
+    setConfigSaving(true);
+    try {
+      await request("config.patch", {
+        baseHash: configSnapshot.hash,
+        raw: JSON.stringify({
+          agents: {
+            list: [
+              {
+                id: activeAgentId,
+                skills: skillsDraft === undefined ? null : (skillsDraft ?? []),
+              },
+            ],
+          },
+        }),
+      });
+      await config.refresh();
+      setSkillsDraft(null);
+    } finally {
+      setConfigSaving(false);
+    }
+  }, [activeAgentId, configSnapshot?.hash, connected, configSaving, request, config, skillsDraft]);
+
   const cronStatus = cron.data?.[0] ?? null;
   const cronJobsRaw = cron.data?.[1]?.jobs ?? [];
   const cronJobsForAgent = activeAgentId
@@ -762,7 +861,7 @@ export function AgentsPanel() {
                     </p>
                   )}
                   {files.error && (
-                    <Alert type="error" message={files.error} style={{ marginBottom: 12 }} />
+                    <Alert type="error" title={files.error} style={{ marginBottom: 12 }} />
                   )}
                   {!files.data && !files.loading && activeAgentId && (
                     <p style={{ fontSize: 13, color: "rgba(15,23,42,0.55)" }}>
@@ -801,7 +900,7 @@ export function AgentsPanel() {
                             {fileLoadError && (
                               <Alert
                                 type="error"
-                                message={fileLoadError}
+                                title={fileLoadError}
                                 style={{ marginBottom: 12 }}
                               />
                             )}
@@ -910,14 +1009,14 @@ export function AgentsPanel() {
                     {tools.error && (
                       <Alert
                         type="warning"
-                        message={tools.error}
+                        title={tools.error}
                         style={{ marginTop: 12, marginBottom: 0 }}
                       />
                     )}
                     {hasAgentAllow && (
                       <Alert
                         type="info"
-                        message="当前代理使用显式 allow 列表，此处不可编辑；请在配置中修改。"
+                        title="当前代理使用显式 allow 列表，此处不可编辑；请在配置中修改。"
                         style={{ marginTop: 12, marginBottom: 0 }}
                       />
                     )}
@@ -1063,6 +1162,7 @@ export function AgentsPanel() {
               {activeTab === "skills" && (
                 <div className="agent-panel-card">
                   <div
+                    className="agent-panel-skills-header"
                     style={{
                       display: "flex",
                       justifyContent: "space-between",
@@ -1073,62 +1173,268 @@ export function AgentsPanel() {
                   >
                     <div>
                       <h3 className="agent-panel-title">Skills</h3>
-                      <p className="agent-panel-sub">当前代理工作区技能状态。</p>
+                      <p className="agent-panel-sub">
+                        Per-agent skill allowlist and workspace skills.{" "}
+                        {rawSkills.length > 0 ? (
+                          <span className="agent-panel-mono">
+                            {effectiveAllowSet.size}/{rawSkills.length}
+                          </span>
+                        ) : null}
+                      </p>
                     </div>
-                    <Button
-                      size="small"
-                      loading={skills.loading}
-                      onClick={() => void skills.refresh()}
-                    >
-                      刷新
-                    </Button>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                      <Button size="small" disabled={!skillsEditable} onClick={handleSkillsUseAll}>
+                        启用所有
+                      </Button>
+                      <Button
+                        size="small"
+                        disabled={!skillsEditable}
+                        onClick={handleSkillsDisableAll}
+                      >
+                        禁用所有
+                      </Button>
+                      <Button size="small" disabled={config.loading} onClick={handleConfigReload}>
+                        重载配置
+                      </Button>
+                      <Button
+                        size="small"
+                        loading={skills.loading}
+                        onClick={() => void skills.refresh()}
+                      >
+                        刷新
+                      </Button>
+                      <Button
+                        type="primary"
+                        size="small"
+                        loading={configSaving}
+                        disabled={!skillsDirty}
+                        onClick={() => void handleSkillsSave()}
+                      >
+                        {configSaving ? "保存中…" : "保存"}
+                      </Button>
+                    </div>
                   </div>
-                  {skills.error && (
-                    <Alert type="error" message={skills.error} style={{ marginBottom: 12 }} />
-                  )}
-                  {skills.data?.skills?.length ? (
-                    <Table
-                      size="small"
-                      rowKey={(r) => r.id ?? r.name}
-                      dataSource={skills.data.skills}
-                      columns={[
-                        {
-                          title: "技能名称",
-                          dataIndex: "name",
-                          key: "name",
-                          render: (name: string) => (
-                            <Typography.Text strong>{name}</Typography.Text>
-                          ),
-                        },
-                        {
-                          title: "状态",
-                          dataIndex: "status",
-                          key: "status",
-                          render: (s: string) => (s ? <Tag>{s}</Tag> : "—"),
-                        },
-                        {
-                          title: "启用",
-                          dataIndex: "enabled",
-                          key: "enabled",
-                          render: (enabled: boolean, record: { name: string }) => (
-                            <Switch
-                              checked={enabled}
-                              onChange={async (checked) => {
-                                await request("skills.update", {
-                                  skillKey: record.name,
-                                  enabled: checked,
-                                });
-                                await skills.refresh();
-                              }}
-                            />
-                          ),
-                        },
-                      ]}
-                      pagination={false}
+                  {!configSnapshot && (
+                    <Alert
+                      type="info"
+                      title="请先加载网关配置以设置按代理的技能允许列表。"
+                      style={{ marginTop: 12 }}
                     />
-                  ) : (
-                    !skills.loading && <Empty description="暂无技能或未加载" />
                   )}
+                  {configSnapshot && (
+                    <Alert
+                      type="info"
+                      title={
+                        effectiveSkillsAllowlist !== undefined
+                          ? "当前代理使用自定义技能允许列表。"
+                          : "所有技能均已启用。禁用任意技能将创建按代理的允许列表。"
+                      }
+                      style={{ marginTop: 12 }}
+                    />
+                  )}
+                  {skills.error && (
+                    <Alert type="error" title={skills.error} style={{ marginTop: 12 }} />
+                  )}
+                  <div
+                    style={{
+                      marginTop: 14,
+                      display: "flex",
+                      flexWrap: "wrap",
+                      alignItems: "center",
+                      gap: 12,
+                    }}
+                  >
+                    <label className="agent-panel-filter-label">
+                      <span>筛选</span>
+                      <Input
+                        placeholder="Search skills"
+                        value={skillsSearchFilter}
+                        onChange={(e) => setSkillsSearchFilter(e.target.value)}
+                        allowClear
+                        style={{ maxWidth: 320 }}
+                      />
+                    </label>
+                    <span className="agent-panel-muted" style={{ fontSize: 12 }}>
+                      {(() => {
+                        const filter = skillsSearchFilter.trim().toLowerCase();
+                        const filtered = filter
+                          ? rawSkills.filter((s) =>
+                              [s.name, s.description ?? "", s.source ?? ""]
+                                .join(" ")
+                                .toLowerCase()
+                                .includes(filter),
+                            )
+                          : rawSkills;
+                        return `${filtered.length} shown`;
+                      })()}
+                    </span>
+                    {skills.data?.skills?.length ? (
+                      <>
+                        <Button
+                          size="small"
+                          onClick={() => {
+                            setSkillsGroupsActiveKey((prev) => [
+                              ...new Set([...(prev ?? []), "built-in"]),
+                            ]);
+                          }}
+                        >
+                          展示所有内置技能
+                        </Button>
+                        <Button
+                          size="small"
+                          onClick={() => {
+                            const filter = skillsSearchFilter.trim().toLowerCase();
+                            const filtered = filter
+                              ? rawSkills.filter((s) =>
+                                  [s.name, s.description ?? "", s.source ?? ""]
+                                    .join(" ")
+                                    .toLowerCase()
+                                    .includes(filter),
+                                )
+                              : rawSkills;
+                            const groups = groupSkills(filtered);
+                            setSkillsGroupsActiveKey(groups.map((g) => g.id));
+                          }}
+                        >
+                          展开所有
+                        </Button>
+                        <Button size="small" onClick={() => setSkillsGroupsActiveKey([])}>
+                          收起所有
+                        </Button>
+                      </>
+                    ) : null}
+                  </div>
+                  {skills.data?.skills?.length
+                    ? (() => {
+                        const filter = skillsSearchFilter.trim().toLowerCase();
+                        const filtered = filter
+                          ? rawSkills.filter((s) =>
+                              [s.name, s.description ?? "", s.source ?? ""]
+                                .join(" ")
+                                .toLowerCase()
+                                .includes(filter),
+                            )
+                          : rawSkills;
+                        const groups = groupSkills(filtered);
+                        const collapseItems = groups.map((group) => ({
+                          key: group.id,
+                          label: (
+                            <span>
+                              {group.label}{" "}
+                              <span className="agent-panel-muted">({group.skills.length})</span>
+                            </span>
+                          ),
+                          children: (
+                            <div className="agent-skills-list">
+                              {group.skills.length === 0 ? (
+                                <Empty
+                                  description={
+                                    group.id === "built-in" ? "暂无内置技能" : "暂无技能"
+                                  }
+                                  style={{ padding: "16px 0" }}
+                                />
+                              ) : (
+                                group.skills.map((skill) => {
+                                  const enabled = effectiveAllowSet.has(skill.name);
+                                  const missing = computeSkillMissing(skill);
+                                  return (
+                                    <div
+                                      key={skill.skillKey ?? skill.name}
+                                      className="agent-skill-row"
+                                      style={{
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        alignItems: "flex-start",
+                                        gap: 12,
+                                        padding: "10px 0",
+                                        borderBottom: "1px solid rgba(15,23,42,0.06)",
+                                      }}
+                                    >
+                                      <div style={{ flex: 1, minWidth: 0 }}>
+                                        <div
+                                          style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: 6,
+                                            marginBottom: 4,
+                                          }}
+                                        >
+                                          {skill.emoji ? (
+                                            <span style={{ fontSize: 16 }}>{skill.emoji}</span>
+                                          ) : null}
+                                          <Typography.Text strong>{skill.name}</Typography.Text>
+                                        </div>
+                                        {skill.description ? (
+                                          <div
+                                            className="agent-panel-muted"
+                                            style={{ fontSize: 12, marginBottom: 6 }}
+                                          >
+                                            {skill.description}
+                                          </div>
+                                        ) : null}
+                                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                                          <Tag>{skill.source ?? "—"}</Tag>
+                                          <Tag
+                                            color={skill.eligible !== false ? "success" : "warning"}
+                                          >
+                                            {skill.eligible !== false ? "eligible" : "blocked"}
+                                          </Tag>
+                                        </div>
+                                        {missing.length > 0 && (
+                                          <div
+                                            className="agent-panel-muted"
+                                            style={{
+                                              fontSize: 12,
+                                              marginTop: 6,
+                                              color: "var(--ant-color-error)",
+                                            }}
+                                          >
+                                            Missing: {missing.join(", ")}
+                                          </div>
+                                        )}
+                                      </div>
+                                      <div style={{ flexShrink: 0 }}>
+                                        <Switch
+                                          checked={enabled}
+                                          disabled={!skillsEditable}
+                                          onChange={(checked) =>
+                                            handleSkillToggle(skill.name, checked)
+                                          }
+                                        />
+                                      </div>
+                                    </div>
+                                  );
+                                })
+                              )}
+                            </div>
+                          ),
+                        }));
+                        const defaultGroupKey = groups.length > 0 ? [groups[0].id] : [];
+                        return (
+                          <Collapse
+                            className="agent-skills-groups"
+                            style={{ marginTop: 16 }}
+                            items={collapseItems}
+                            activeKey={
+                              skillsGroupsActiveKey !== undefined
+                                ? skillsGroupsActiveKey
+                                : defaultGroupKey
+                            }
+                            onChange={(keys) =>
+                              setSkillsGroupsActiveKey(
+                                Array.isArray(keys) ? keys : keys ? [keys] : [],
+                              )
+                            }
+                            ghost
+                          />
+                        );
+                      })()
+                    : !skills.loading && (
+                        <Empty
+                          description={rawSkills.length === 0 ? "暂无技能或未加载" : "无匹配技能"}
+                          style={{ marginTop: 24 }}
+                        />
+                      )}
                 </div>
               )}
 
@@ -1156,7 +1462,7 @@ export function AgentsPanel() {
                     </Button>
                   </div>
                   {channels.error && (
-                    <Alert type="error" message={channels.error} style={{ marginBottom: 12 }} />
+                    <Alert type="error" title={channels.error} style={{ marginBottom: 12 }} />
                   )}
                   {channels.data && channelIds.length > 0 ? (
                     <Table

@@ -194,16 +194,32 @@ export type SessionsListResult = {
   }>;
 };
 
+/** 与 gateway skills.status 返回的条目结构对齐（含 description、source、missing、eligible 等） */
+export type SkillStatusEntry = {
+  name: string;
+  description?: string;
+  source?: string;
+  skillKey?: string;
+  emoji?: string;
+  bundled?: boolean;
+  eligible?: boolean;
+  disabled?: boolean;
+  blockedByAllowlist?: boolean;
+  requirements?: { bins?: string[]; env?: string[]; config?: string[]; os?: string[] };
+  missing?: { bins?: string[]; env?: string[]; config?: string[]; os?: string[] };
+  install?: Array<{ id: string; kind?: string; label?: string; bins?: string[] }>;
+  id?: string;
+  enabled?: boolean;
+  status?: string;
+  installId?: string;
+  apiKeyConfigured?: boolean;
+  [key: string]: unknown;
+};
+
 export type SkillStatusReport = {
-  skills: Array<{
-    id?: string;
-    name: string;
-    enabled?: boolean;
-    status?: string;
-    installId?: string;
-    apiKeyConfigured?: boolean;
-    [key: string]: unknown;
-  }>;
+  workspaceDir?: string;
+  managedSkillsDir?: string;
+  skills: SkillStatusEntry[];
   [key: string]: unknown;
 };
 

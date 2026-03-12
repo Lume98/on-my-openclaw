@@ -234,12 +234,12 @@ export function OverviewPanel() {
                   </Text>
                 </Space>
                 <Space orientation="vertical" size="small" style={{ width: "100%", marginTop: 8 }}>
-                  {lastError ? <Alert type="error" showIcon message={lastError} /> : null}
+                  {lastError ? <Alert type="error" showIcon title={lastError} /> : null}
                   {showPairingHint ? (
                     <Alert
                       type="warning"
                       showIcon
-                      message="当前连接需要设备配对"
+                      title="当前连接需要设备配对"
                       description="先在已登录的设备或 CLI 中批准当前浏览器的配对请求，然后回到节点页查看待审批设备。"
                     />
                   ) : null}
@@ -247,7 +247,7 @@ export function OverviewPanel() {
                     <Alert
                       type="warning"
                       showIcon
-                      message={
+                      title={
                         lastErrorCode && authRequiredCodes.has(lastErrorCode)
                           ? "需要提供鉴权信息"
                           : "鉴权失败"
@@ -263,7 +263,7 @@ export function OverviewPanel() {
                     <Alert
                       type="info"
                       showIcon
-                      message="当前浏览器上下文不安全"
+                      title="当前浏览器上下文不安全"
                       description="设备身份签名只在 HTTPS、localhost 或受信安全上下文下可用。若必须使用 HTTP，需要网关允许不安全鉴权。"
                     />
                   ) : null}

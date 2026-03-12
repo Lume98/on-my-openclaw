@@ -39,8 +39,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     cancelPendingGatewayUrlChange,
   } = useSettings();
 
-  const { connected, connecting, connect, disconnect, hello, presenceEntries, lastError } =
-    useGateway();
+  const { connected, connecting, connect, disconnect, hello, lastError } = useGateway();
 
   const [connectOpen, setConnectOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -54,7 +53,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   };
 
   const handleThemeChange = () => {
-    setTheme(settings.theme === "dark" ? "light" : settings.theme === "light" ? "system" : "dark");
+    setTheme(resolvedTheme === "dark" ? "light" : "dark");
   };
 
   const handleNavCollapseToggle = () => {
@@ -90,8 +89,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             connected={connected}
             connecting={connecting}
             hello={hello}
-            presenceEntries={presenceEntries}
-            theme={settings.theme}
+            theme={resolvedTheme}
             onThemeChange={handleThemeChange}
             navCollapsed={settings.navCollapsed}
             onNavCollapseToggle={handleNavCollapseToggle}
@@ -105,7 +103,12 @@ export function AppLayout({ children }: AppLayoutProps) {
             }}
           />
 
-          <Main children={children} activeTab={activeTab} lastError={lastError} />
+          <Main
+            children={children}
+            activeTab={activeTab}
+            lastError={lastError}
+            skipSurface={pathname === "/overview"}
+          />
 
           <ConfirmGatewayModal
             pendingGatewayUrl={pendingGatewayUrl}

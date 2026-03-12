@@ -24,6 +24,8 @@ type SettingsContextValue = {
   password: string;
   resolvedTheme: "light" | "dark";
   pendingGatewayUrl: string | null;
+  /** 本地设置是否已从 storage 加载完成 */
+  settingsHydrated: boolean;
   applySettings: (patch: Partial<UiSettings>) => void;
   setPassword: (next: string) => void;
   setTheme: (next: ThemeMode) => void;
@@ -388,6 +390,7 @@ export function SettingsProvider({ children }: PropsWithChildren) {
       password,
       resolvedTheme,
       pendingGatewayUrl,
+      settingsHydrated,
       applySettings,
       setPassword,
       setTheme,
@@ -403,6 +406,7 @@ export function SettingsProvider({ children }: PropsWithChildren) {
       resolvedTheme,
       setTheme,
       settings,
+      settingsHydrated,
     ],
   );
 

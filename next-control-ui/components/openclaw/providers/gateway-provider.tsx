@@ -44,8 +44,9 @@ function getErrorMessage(error: unknown) {
 }
 
 export function GatewayProvider({ children }: PropsWithChildren) {
-  const { settings, password } = useSettings();
+  const { settings, password, settingsHydrated } = useSettings();
   const [client, setClient] = useState<GatewayBrowserClient | null>(null);
+  const hasAutoConnectedRef = useRef(false);
   const [connected, setConnected] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [hello, setHello] = useState<GatewayHelloOk | null>(null);
@@ -172,6 +173,18 @@ export function GatewayProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     return () => disconnect();
   }, [disconnect]);
+
+  // 设置加载完成后自动连接一次，避免每次刷新都要手动点连接
+  useEffect(() => {
+    if (!settingsHydrated || hasAutoConnectedRef.current) {
+      return;
+    }
+    if (!settings.gatewayUrl?.trim()) {
+      return;
+    }
+    hasAutoConnectedRef.current = true;
+    connect();
+  }, [settingsHydrated, settings.gatewayUrl, connect]);
 
   const value = useMemo<GatewayContextValue>(
     () => ({

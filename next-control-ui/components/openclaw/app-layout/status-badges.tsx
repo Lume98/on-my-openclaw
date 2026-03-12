@@ -1,34 +1,29 @@
-import { Badge, Tag } from "antd";
 import { CONNECTION_STATUS, HEADER_LABELS } from "./header-constants";
 
 type StatusBadgesProps = {
   connected: boolean;
   connecting: boolean;
-  presenceEntriesCount: number;
   version?: string | null;
 };
 
-export function StatusBadges({
-  connected,
-  connecting,
-  presenceEntriesCount,
-  version,
-}: StatusBadgesProps) {
+export function StatusBadges({ connected, connecting, version }: StatusBadgesProps) {
+  const statusText = connected
+    ? CONNECTION_STATUS.CONNECTED
+    : connecting
+      ? CONNECTION_STATUS.CONNECTING
+      : CONNECTION_STATUS.DISCONNECTED;
+
   return (
-    <>
-      <Tag color={connected ? "success" : connecting ? "processing" : "default"}>
-        {connected
-          ? CONNECTION_STATUS.CONNECTED
-          : connecting
-            ? CONNECTION_STATUS.CONNECTING
-            : CONNECTION_STATUS.DISCONNECTED}
-      </Tag>
-      <Badge count={presenceEntriesCount} size="small">
-        <Tag color="cyan">{HEADER_LABELS.ONLINE_INSTANCES}</Tag>
-      </Badge>
-      <Tag color="geekblue">
+    <span className="control-header-status">
+      <span
+        className={`control-header-status-item control-header-status--${connected ? "connected" : connecting ? "connecting" : "disconnected"}`}
+      >
+        <span className="control-header-status-dot" aria-hidden />
+        {statusText}
+      </span>
+      <span className="control-header-status-item control-header-status--version">
         {HEADER_LABELS.VERSION} {version ?? HEADER_LABELS.UNKNOWN}
-      </Tag>
-    </>
+      </span>
+    </span>
   );
 }

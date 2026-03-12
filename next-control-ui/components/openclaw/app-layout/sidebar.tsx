@@ -1,15 +1,14 @@
 "use client";
 
-import { Button, Layout, Menu, Typography } from "antd";
-import type { MenuProps } from "antd";
+import { DownOutlined, RightOutlined } from "@ant-design/icons";
+import { Layout } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, type CSSProperties } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 import { Icon } from "@/components/icons";
-import { getTabByPath, tabGroups, tabs } from "@/components/openclaw/navigation";
+import { getTabByPath, tabGroups, tabs, type TabGroupKey } from "@/components/openclaw/navigation";
 
 const { Sider } = Layout;
-const { Text, Title } = Typography;
 
 type SidebarProps = {
   pathname: string;
@@ -21,6 +20,8 @@ type SidebarProps = {
   theme: "light" | "dark";
   style?: CSSProperties;
 };
+
+const defaultExpandedGroups: TabGroupKey[] = ["chat", "control", "agent", "settings"];
 
 export function Sidebar({
   pathname,
@@ -35,56 +36,107 @@ export function Sidebar({
   const router = useRouter();
   const activeTab = useMemo(() => getTabByPath(pathname), [pathname]);
 
-  const sideMenuItems = useMemo<MenuProps["items"]>(
-    () =>
-      tabGroups.map((group) => ({
-        key: group.key,
-        label: group.title,
-        type: "group" as const,
-        children: tabs
-          .filter((tab) => tab.group === group.key)
-          .map((tab) => ({
-            key: tab.path,
-            icon: <Icon name={tab.icon} size={16} />,
-            label: tab.title,
-          })),
-      })),
-    [],
-  );
+  const [expandedGroups, setExpandedGroups] = useState<TabGroupKey[]>(defaultExpandedGroups);
+
+  const toggleGroup = (key: TabGroupKey) => {
+    setExpandedGroups((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
+    );
+  };
+
+  const handleNav = (path: string) => {
+    router.push(path);
+    onMenuItemClick?.();
+  };
 
   const sidebarContent = (
     <div className="control-sider-content">
+      {/* Logo / Brand */}
       <div className="control-brand">
-        <Link href="/chat" className="control-brand-link">
+        <Link href="/chat" className="control-brand-link" onClick={() => onMenuItemClick?.()}>
           <div className="control-brand-badge">OC</div>
           {!collapsed ? (
             <div className="control-brand-copy">
-              <Title level={5} style={{ margin: 0 }}>
-                OpenClaw
-              </Title>
-              <Text type="secondary">Gateway Dashboard</Text>
+              <span className="control-brand-title">OpenClaw</span>
+              <span className="control-brand-subtitle">Gateway Dashboard</span>
             </div>
           ) : null}
         </Link>
       </div>
 
-      <div className="control-nav-menu-wrapper">
-        <Menu
-          mode="inline"
-          selectedKeys={[activeTab.path]}
-          items={sideMenuItems}
-          onClick={({ key }) => {
-            router.push(String(key));
-            onMenuItemClick?.();
-          }}
-          className="control-nav-menu"
-        />
-      </div>
+      {/* Navigation: 展开时按分组折叠展示，收起时仅图标列表 */}
+      <nav className="control-nav-menu-wrapper">
+        {collapsed ? (
+          <div className="control-nav-icons">
+            {tabs.map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => handleNav(tab.path)}
+                className={`control-nav-icon-btn${activeTab.key === tab.key ? " control-nav-icon-btn-active" : ""}`}
+                title={tab.title}
+              >
+                <Icon name={tab.icon} size={18} />
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="control-nav-groups">
+            {tabGroups.map((group) => {
+              const groupTabs = tabs.filter((t) => t.group === group.key);
+              const isExpanded = expandedGroups.includes(group.key);
+              const firstTab = groupTabs[0];
+              return (
+                <div key={group.key} className="control-nav-group">
+                  <button
+                    type="button"
+                    onClick={() => toggleGroup(group.key)}
+                    className={`control-nav-group-btn${isExpanded ? " control-nav-group-btn-expanded" : ""}`}
+                  >
+                    <span className="control-nav-group-label">
+                      {firstTab ? <Icon name={firstTab.icon} size={16} /> : null}
+                      <span>{group.title}</span>
+                    </span>
+                    {isExpanded ? (
+                      <DownOutlined className="control-nav-chevron" />
+                    ) : (
+                      <RightOutlined className="control-nav-chevron" />
+                    )}
+                  </button>
+                  {isExpanded && groupTabs.length > 0 && (
+                    <div className="control-nav-children">
+                      {groupTabs.map((tab) => {
+                        const isActive = activeTab.key === tab.key;
+                        return (
+                          <button
+                            key={tab.key}
+                            type="button"
+                            onClick={() => handleNav(tab.path)}
+                            className={`control-nav-child${isActive ? " control-nav-child-active" : ""}`}
+                          >
+                            {tab.title}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </nav>
 
+      {/* Footer */}
       <div className="control-sider-footer">
-        <Button type="link" href="https://docs.openclaw.ai" target="_blank" rel="noreferrer">
+        <a
+          href="https://docs.openclaw.ai"
+          target="_blank"
+          rel="noreferrer"
+          className="control-sider-footer-link"
+        >
           文档
-        </Button>
+        </a>
       </div>
     </div>
   );

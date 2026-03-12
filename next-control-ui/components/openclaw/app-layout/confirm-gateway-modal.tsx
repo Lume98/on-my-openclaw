@@ -1,6 +1,6 @@
 "use client";
 
-import { Modal, Space, Typography } from "antd";
+import { Alert, Modal, Space, Typography } from "antd";
 
 type ConfirmGatewayModalProps = {
   pendingGatewayUrl: string | null;
@@ -22,14 +22,17 @@ export function ConfirmGatewayModal({
       okText="确认切换"
       cancelText="取消"
     >
-      <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+      <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
         <Typography.Text>检测到地址参数请求切换到新的网关：</Typography.Text>
         <Typography.Paragraph copyable style={{ marginBottom: 0 }}>
           {pendingGatewayUrl ?? ""}
         </Typography.Paragraph>
-        <Typography.Text type="secondary">
-          仅在你信任这个地址时确认。切换后会使用该地址对应的会话令牌并重新连接。
-        </Typography.Text>
+        <Alert
+          type="warning"
+          showIcon
+          message="安全提示"
+          description="仅在你信任该地址时确认。恶意地址可能危害你的系统。切换后将使用该地址对应的会话令牌并重新连接。"
+        />
       </Space>
     </Modal>
   );

@@ -1,4 +1,4 @@
-import { AgentsPanel } from "@/components/panels";
+import { AgentsPanel } from "@/components/views";
 
 export default function AgentsPage() {
   return <AgentsPanel />;

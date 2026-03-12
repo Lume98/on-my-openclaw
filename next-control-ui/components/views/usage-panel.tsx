@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { Button, Col, Row, SectionCard, Space } from "@/components/panels/dashboard-utils";
-import { JsonBlock } from "@/components/panels/dashboard-utils";
-import { useGatewayQuery } from "@/components/panels/use-gateway-query";
 import { useGateway } from "@/components/providers/gateway-provider";
+import { Button, Col, Row, SectionCard, Space } from "@/components/views/dashboard-utils";
+import { JsonBlock } from "@/components/views/dashboard-utils";
+import { useGatewayQuery } from "@/components/views/use-gateway-query";
 
 export function UsagePanel() {
   const { request, connected } = useGateway();

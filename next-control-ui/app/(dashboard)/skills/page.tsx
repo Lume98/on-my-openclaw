@@ -1,4 +1,4 @@
-import { SkillsPanel } from "@/components/panels";
+import { SkillsPanel } from "@/components/views";
 
 export default function SkillsPage() {
   return <SkillsPanel />;

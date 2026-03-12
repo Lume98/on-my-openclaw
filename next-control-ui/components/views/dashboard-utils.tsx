@@ -19,7 +19,7 @@ import {
   Tag,
 } from "antd";
 
-export { JsonBlock, SectionCard } from "@/components/panels/dashboard-components";
+export { JsonBlock, SectionCard } from "@/components/views/dashboard-components";
 
 export function stringify(value: unknown) {
   try {

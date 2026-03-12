@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { clearDeviceAuthToken, storeDeviceAuthToken } from "@/components/device-auth";
 import { loadOrCreateDeviceIdentity } from "@/components/device-identity";
+import { useGateway } from "@/components/providers/gateway-provider";
 import {
   Alert,
   Button,
@@ -15,44 +16,12 @@ import {
   Table,
   Tag,
   Typography,
-} from "@/components/panels/dashboard-utils";
-import { formatTimestamp, stringifyList } from "@/components/panels/dashboard-utils";
-import { useGatewayQuery } from "@/components/panels/use-gateway-query";
-import { useGateway } from "@/components/providers/gateway-provider";
-import type { DevicePairingList } from "@/components/types";
+} from "@/components/views/dashboard-utils";
+import { formatTimestamp, stringifyList } from "@/components/views/dashboard-utils";
+import { useGatewayQuery } from "@/components/views/use-gateway-query";
+import { normalizeDevicePairingList, normalizeNodesPayload } from "./utils";
 
 const { Text } = Typography;
-
-function normalizeDevicePairingList(payload: unknown): DevicePairingList {
-  if (!payload || typeof payload !== "object") {
-    return { pending: [], paired: [] };
-  }
-
-  const entry = payload as { pending?: unknown; paired?: unknown };
-  return {
-    pending: Array.isArray(entry.pending) ? (entry.pending as DevicePairingList["pending"]) : [],
-    paired: Array.isArray(entry.paired) ? (entry.paired as DevicePairingList["paired"]) : [],
-  };
-}
-
-function normalizeNodesPayload(payload: unknown) {
-  if (Array.isArray(payload)) {
-    return payload.filter((entry): entry is Record<string, unknown> =>
-      Boolean(entry && typeof entry === "object"),
-    );
-  }
-
-  if (!payload || typeof payload !== "object") {
-    return [];
-  }
-
-  const nodes = (payload as { nodes?: unknown }).nodes;
-  return Array.isArray(nodes)
-    ? nodes.filter((entry): entry is Record<string, unknown> =>
-        Boolean(entry && typeof entry === "object"),
-      )
-    : [];
-}
 
 export function NodesPanel() {
   const { request, connected } = useGateway();

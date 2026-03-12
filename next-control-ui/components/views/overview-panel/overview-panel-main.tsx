@@ -21,52 +21,12 @@ import {
   Tag,
   Typography,
 } from "antd";
-import { ConnectErrorDetailCodes } from "@/components/connect-error-details";
-import { formatDuration } from "@/components/panels/dashboard-utils";
 import { useGateway } from "@/components/providers/gateway-provider";
 import { useSettings } from "@/components/providers/settings-provider";
+import { formatDuration } from "@/components/views/dashboard-utils";
+import { shouldShowPairingHint, authFailureCodes } from "./utils";
 
 const { Text, Title } = Typography;
-
-const authRequiredCodes = new Set<string>([
-  ConnectErrorDetailCodes.AUTH_REQUIRED,
-  ConnectErrorDetailCodes.AUTH_TOKEN_MISSING,
-  ConnectErrorDetailCodes.AUTH_PASSWORD_MISSING,
-  ConnectErrorDetailCodes.AUTH_TOKEN_NOT_CONFIGURED,
-  ConnectErrorDetailCodes.AUTH_PASSWORD_NOT_CONFIGURED,
-]);
-
-const authFailureCodes = new Set<string>([
-  ...authRequiredCodes,
-  ConnectErrorDetailCodes.AUTH_UNAUTHORIZED,
-  ConnectErrorDetailCodes.AUTH_TOKEN_MISMATCH,
-  ConnectErrorDetailCodes.AUTH_PASSWORD_MISMATCH,
-  ConnectErrorDetailCodes.AUTH_DEVICE_TOKEN_MISMATCH,
-  ConnectErrorDetailCodes.AUTH_RATE_LIMITED,
-  ConnectErrorDetailCodes.AUTH_TAILSCALE_IDENTITY_MISSING,
-  ConnectErrorDetailCodes.AUTH_TAILSCALE_PROXY_MISSING,
-  ConnectErrorDetailCodes.AUTH_TAILSCALE_WHOIS_FAILED,
-  ConnectErrorDetailCodes.AUTH_TAILSCALE_IDENTITY_MISMATCH,
-]);
-
-function shouldShowPairingHint(
-  connected: boolean,
-  lastError: string | null,
-  lastErrorCode: string | null,
-) {
-  if (connected || !lastError) {
-    return false;
-  }
-
-  return (
-    lastErrorCode === ConnectErrorDetailCodes.PAIRING_REQUIRED ||
-    lastError.toLowerCase().includes("pairing required")
-  );
-}
-
-// function getStatusColor(status: boolean) {
-//   return status ? "#52c41a" : "#ff4d4f";
-// }
 
 function getStatusBadge(status: boolean) {
   if (status) {

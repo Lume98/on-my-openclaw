@@ -1,8 +1,8 @@
 "use client";
 
-import { Button, Empty, SectionCard, Table } from "@/components/panels/dashboard-utils";
-import { formatTimestamp } from "@/components/panels/dashboard-utils";
 import { useGateway } from "@/components/providers/gateway-provider";
+import { Button, Empty, SectionCard, Table } from "@/components/views/dashboard-utils";
+import { formatTimestamp } from "@/components/views/dashboard-utils";
 
 export function InstancesPanel() {
   const { presenceEntries, refreshPresence } = useGateway();

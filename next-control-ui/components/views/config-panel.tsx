@@ -1,6 +1,9 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { useGateway } from "@/components/providers/gateway-provider";
+import { useSettings } from "@/components/providers/settings-provider";
+import type { ConfigSchemaResponse, ConfigSnapshot } from "@/components/types";
 import {
   Button,
   Col,
@@ -9,12 +12,9 @@ import {
   Row,
   SectionCard,
   Space,
-} from "@/components/panels/dashboard-utils";
-import { JsonBlock, stringify } from "@/components/panels/dashboard-utils";
-import { useGatewayQuery } from "@/components/panels/use-gateway-query";
-import { useGateway } from "@/components/providers/gateway-provider";
-import { useSettings } from "@/components/providers/settings-provider";
-import type { ConfigSchemaResponse, ConfigSnapshot } from "@/components/types";
+} from "@/components/views/dashboard-utils";
+import { JsonBlock, stringify } from "@/components/views/dashboard-utils";
+import { useGatewayQuery } from "@/components/views/use-gateway-query";
 
 export function ConfigPanel() {
   const { request, connected } = useGateway();

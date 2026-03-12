@@ -17,18 +17,18 @@ export type AsyncState<T> = {
 
 // NOTE: The DashboardPage component has been refactored.
 // Each panel is now exported as a separate component:
-// - OverviewPanel -> @/components/panels/overview-panel.tsx
-// - ChatPanel -> @/components/panels/chat-panel.tsx
-// - ChannelsPanel -> @/components/panels/channels-panel.tsx
-// - InstancesPanel -> @/components/panels/instances-panel.tsx
-// - SessionsPanel -> @/components/panels/sessions-panel.tsx
-// - UsagePanel -> @/components/panels/usage-panel.tsx
-// - CronPanel -> @/components/panels/cron-panel.tsx
-// - AgentsPanel -> @/components/panels/agents-panel.tsx
-// - SkillsPanel -> @/components/panels/skills-panel.tsx
-// - NodesPanel -> @/components/panels/nodes-panel.tsx
-// - ConfigPanel -> @/components/panels/config-panel.tsx
-// - DebugPanel -> @/components/panels/debug-panel.tsx
-// - LogsPanel -> @/components/panels/logs-panel.tsx
+// - OverviewPanel -> @/components/views/overview-panel.tsx
+// - ChatPanel -> @/components/views/chat-panel.tsx
+// - ChannelsPanel -> @/components/views/channels-panel.tsx
+// - InstancesPanel -> @/components/views/instances-panel.tsx
+// - SessionsPanel -> @/components/views/sessions-panel.tsx
+// - UsagePanel -> @/components/views/usage-panel.tsx
+// - CronPanel -> @/components/views/cron-panel.tsx
+// - AgentsPanel -> @/components/views/agents-panel.tsx
+// - SkillsPanel -> @/components/views/skills-panel.tsx
+// - NodesPanel -> @/components/views/nodes-panel.tsx
+// - ConfigPanel -> @/components/views/config-panel.tsx
+// - DebugPanel -> @/components/views/debug-panel.tsx
+// - LogsPanel -> @/components/views/logs-panel.tsx
 //
 // Import the specific panel you need directly in your page component.

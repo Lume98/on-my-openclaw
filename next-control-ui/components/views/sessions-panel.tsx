@@ -1,6 +1,9 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { useGateway } from "@/components/providers/gateway-provider";
+import { useSettings } from "@/components/providers/settings-provider";
+import type { SessionsListResult } from "@/components/types";
 import {
   Alert,
   Button,
@@ -10,12 +13,9 @@ import {
   Switch,
   Table,
   Typography,
-} from "@/components/panels/dashboard-utils";
-import { formatTimestamp } from "@/components/panels/dashboard-utils";
-import { useGatewayQuery } from "@/components/panels/use-gateway-query";
-import { useGateway } from "@/components/providers/gateway-provider";
-import { useSettings } from "@/components/providers/settings-provider";
-import type { SessionsListResult } from "@/components/types";
+} from "@/components/views/dashboard-utils";
+import { formatTimestamp } from "@/components/views/dashboard-utils";
+import { useGatewayQuery } from "@/components/views/use-gateway-query";
 
 const { Text } = Typography;
 

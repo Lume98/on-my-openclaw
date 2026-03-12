@@ -2,10 +2,10 @@
 
 import { Alert, Button, Card, Empty, Space, Spin, Switch, Tag, Typography } from "antd";
 import React, { useCallback, useMemo, useState } from "react";
-import { formatTimestamp, SectionCard } from "@/components/panels/dashboard-utils";
-import { useGatewayQuery } from "@/components/panels/use-gateway-query";
 import { useGateway } from "@/components/providers/gateway-provider";
 import type { ChannelsStatusSnapshot } from "@/components/types";
+import { formatTimestamp, SectionCard } from "@/components/views/dashboard-utils";
+import { useGatewayQuery } from "@/components/views/use-gateway-query";
 
 const { Text } = Typography;
 

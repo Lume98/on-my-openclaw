@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { AsyncState } from "@/components/panels/dashboard-components";
 import { useGateway } from "@/components/providers/gateway-provider";
+import type { AsyncState } from "@/components/views/dashboard-components";
 
 export function useGatewayQuery<T>(loader: () => Promise<T>, enabled = true): AsyncState<T> {
   const { connected } = useGateway();

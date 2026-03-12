@@ -2,10 +2,10 @@
 
 import { Button, Checkbox, Empty, Input, Space, Spin, Typography } from "antd";
 import { useCallback, useMemo, useState } from "react";
-import { LOG_LEVELS, parseLogLine } from "@/components/panels/logs-parse";
-import { useGatewayQuery } from "@/components/panels/use-gateway-query";
 import { useGateway } from "@/components/providers/gateway-provider";
 import type { LogEntry, LogsTailPayload } from "@/components/types";
+import { LOG_LEVELS, parseLogLine } from "@/components/views/logs-parse";
+import { useGatewayQuery } from "@/components/views/use-gateway-query";
 
 const { Text } = Typography;
 

@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { useGateway } from "@/components/providers/gateway-provider";
+import type { SkillStatusReport } from "@/components/types";
 import {
   Button,
   Card,
@@ -9,10 +11,8 @@ import {
   Space,
   Switch,
   Typography,
-} from "@/components/panels/dashboard-utils";
-import { useGatewayQuery } from "@/components/panels/use-gateway-query";
-import { useGateway } from "@/components/providers/gateway-provider";
-import type { SkillStatusReport } from "@/components/types";
+} from "@/components/views/dashboard-utils";
+import { useGatewayQuery } from "@/components/views/use-gateway-query";
 
 const { Title } = Typography;
 

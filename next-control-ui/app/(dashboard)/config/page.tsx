@@ -1,4 +1,4 @@
-import { ConfigPanel } from "@/components/panels";
+import { ConfigPanel } from "@/components/views";
 
 export default function ConfigPage() {
   return <ConfigPanel />;

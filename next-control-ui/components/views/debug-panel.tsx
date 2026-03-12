@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { useGateway } from "@/components/providers/gateway-provider";
 import {
   Alert,
   Button,
@@ -11,10 +12,9 @@ import {
   SectionCard,
   Select,
   Space,
-} from "@/components/panels/dashboard-utils";
-import { JsonBlock, stringify } from "@/components/panels/dashboard-utils";
-import { useGatewayQuery } from "@/components/panels/use-gateway-query";
-import { useGateway } from "@/components/providers/gateway-provider";
+} from "@/components/views/dashboard-utils";
+import { JsonBlock, stringify } from "@/components/views/dashboard-utils";
+import { useGatewayQuery } from "@/components/views/use-gateway-query";
 
 export function DebugPanel() {
   const { request, connected, hello } = useGateway();

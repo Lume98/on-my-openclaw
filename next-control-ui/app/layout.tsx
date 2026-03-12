@@ -1,7 +1,7 @@
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import type { Metadata } from "next";
 import { Bebas_Neue, Noto_Sans_SC, Roboto_Mono } from "next/font/google";
-import { OpenclawProviders } from "@/components/openclaw/providers/openclaw-providers";
+import { OpenclawProviders } from "@/components/providers/openclaw-providers";
 import "./globals.css";
 
 const displayFont = Bebas_Neue({

@@ -1,4 +1,4 @@
-import { LogsPanel } from "@/components/openclaw/panels";
+import { LogsPanel } from "@/components/panels";
 
 export default function LogsPage() {
   return <LogsPanel />;

@@ -1,4 +1,4 @@
-import { SkillsPanel } from "@/components/openclaw/panels";
+import { SkillsPanel } from "@/components/panels";
 
 export default function SkillsPage() {
   return <SkillsPanel />;

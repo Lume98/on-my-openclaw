@@ -1,4 +1,4 @@
-import { DebugPanel } from "@/components/openclaw/panels";
+import { DebugPanel } from "@/components/panels";
 
 export default function DebugPage() {
   return <DebugPanel />;

@@ -16,9 +16,9 @@ alwaysApply: true
 
 ```typescript
 // ✅ 正确
-import { OpenClawApp } from '@/components/openclaw/open-claw-app';
-import type { TabKey } from '@/components/openclaw/types';
-import { useGateway } from '@/components/openclaw/hooks/use-gateway';
+import { OpenClawApp } from '@/components/open-claw-app';
+import type { TabKey } from '@/components/types';
+import { useGateway } from '@/components/hooks/use-gateway';
 
 // ❌ 错误
 import { OpenClawApp } from './open-claw-app';

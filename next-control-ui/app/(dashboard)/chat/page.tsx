@@ -1,4 +1,4 @@
-import { ChatPanel } from "@/components/openclaw/panels";
+import { ChatPanel } from "@/components/panels";
 
 export default function ChatPage() {
   return <ChatPanel />;

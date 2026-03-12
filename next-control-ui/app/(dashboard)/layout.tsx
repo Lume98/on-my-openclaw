@@ -1,4 +1,4 @@
-import { AppLayout } from "@/components/openclaw/app-layout";
+import { AppLayout } from "@/components/app-layout";
 
 export default function DashboardLayout({
   children,

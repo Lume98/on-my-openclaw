@@ -1,4 +1,4 @@
-import { ConfigPanel } from "@/components/openclaw/panels";
+import { ConfigPanel } from "@/components/panels";
 
 export default function ConfigPage() {
   return <ConfigPanel />;

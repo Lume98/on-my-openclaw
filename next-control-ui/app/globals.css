@@ -1740,6 +1740,10 @@ html[data-theme="dark"] .control-nav-menu-wrapper::-webkit-scrollbar-thumb:hover
   color: rgba(15, 23, 42, 0.7);
 }
 
+.skill-apikey-input {
+  width: 100%;
+}
+
 .skill-save-key-btn {
   margin-top: 4px;
 }

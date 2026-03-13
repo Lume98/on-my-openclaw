@@ -1504,3 +1504,116 @@ html[data-theme="dark"] .control-nav-menu-wrapper::-webkit-scrollbar-thumb:hover
   }
 }
 
+.cron-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cron-page__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.cron-page__status-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.cron-page__stat-card .ant-card-body {
+  padding: 18px 20px;
+}
+
+.cron-page__main {
+  display: grid;
+  gap: 16px;
+  align-items: start;
+  grid-template-columns: minmax(0, 1.65fr) minmax(320px, 0.95fr);
+}
+
+.cron-page__left {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cron-page__right {
+  min-width: 0;
+}
+
+.cron-page__form-card {
+  position: sticky;
+  top: 24px;
+}
+
+.cron-page__filters {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.cron-page__form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.9), rgba(255, 255, 255, 1));
+}
+
+.cron-page__form-section:last-of-type {
+  margin-bottom: 20px;
+}
+
+.cron-page__inline-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cron-page__inline-grid--wide {
+  grid-template-columns: minmax(0, 1.2fr) minmax(140px, 0.8fr);
+}
+
+.cron-page__form-actions {
+  display: flex;
+  gap: 12px;
+}
+
+@media (max-width: 1200px) {
+  .cron-page__status-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cron-page__main {
+    grid-template-columns: 1fr;
+  }
+
+  .cron-page__form-card {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .cron-page__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cron-page__filters,
+  .cron-page__inline-grid,
+  .cron-page__inline-grid--wide {
+    grid-template-columns: 1fr;
+  }
+
+  .cron-page__form-actions {
+    flex-direction: column;
+  }
+}
+

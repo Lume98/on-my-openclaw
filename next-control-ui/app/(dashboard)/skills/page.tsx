@@ -140,19 +140,20 @@ export default function SkillsPage() {
   );
 
   return (
-    <Card className="skills-section-card" variant="borderless">
+    <Card
+      className="!rounded-none !border-0 !shadow-none [&_.ant-card-body]:!p-0"
+      variant="borderless"
+    >
       <SkillsToolbar
         connected={connected}
         count={filtered.length}
-        filter={filter}
+        filter={""}
         loading={skillsQuery.loading}
         onFilterChange={setFilter}
         onRefresh={handleRefresh}
       />
 
-      {skillsQuery.error && (
-        <Alert type="error" message={skillsQuery.error} className="skills-error-alert" />
-      )}
+      {skillsQuery.error && <Alert type="error" title={skillsQuery.error} className="mt-3" />}
 
       <SkillsGroups
         busyKey={busyKey}

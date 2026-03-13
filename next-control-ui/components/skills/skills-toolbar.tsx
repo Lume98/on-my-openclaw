@@ -23,29 +23,30 @@ export function SkillsToolbar({
 }: SkillsToolbarProps) {
   return (
     <>
-      <div className="skills-section-head">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className="skills-section-title">Skills</div>
-          <div className="skills-section-sub">Bundled, managed, and workspace skills.</div>
+          <div className="m-0 text-base font-semibold leading-5 text-[var(--foreground)]">技能</div>
+          <div className="mt-1 text-[13px] leading-[1.4] text-slate-500">
+            内置、已管理和工作区技能。
+          </div>
         </div>
         <Button onClick={onRefresh} loading={loading} disabled={!connected}>
-          {loading ? "Loading…" : "Refresh"}
+          {loading ? "加载中…" : "刷新"}
         </Button>
       </div>
 
-      <div className="skills-filter-row">
-        <label className="skills-filter-label">
-          <span>Filter</span>
+      <div className="mt-3.5 flex flex-wrap items-center gap-3">
+        <label className="flex min-w-[200px] flex-1 flex-col gap-1.5">
+          <span className="text-[13px] font-medium text-slate-600">筛选</span>
           <Input
-            placeholder="Search skills"
+            placeholder="搜索技能"
             value={filter}
             onChange={(e) => onFilterChange(e.target.value)}
             allowClear
-            className="skills-filter-input"
           />
         </label>
-        <Text type="secondary" className="skills-filter-count">
-          {count} shown
+        <Text type="secondary" className="shrink-0 text-[13px]">
+          已显示 {count} 项
         </Text>
       </div>
     </>

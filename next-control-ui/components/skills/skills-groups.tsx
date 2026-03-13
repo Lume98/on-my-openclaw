@@ -39,7 +39,7 @@ export function SkillsGroups({
 }: SkillsGroupsProps) {
   if (filteredCount === 0) {
     return (
-      <div className="skills-empty">
+      <div className="mt-4">
         <Empty description="No skills found." />
       </div>
     );
@@ -47,18 +47,19 @@ export function SkillsGroups({
 
   return (
     <Collapse
-      defaultActiveKey={collapseDefaultOpen}
-      className="skills-groups-collapse"
-      items={groups.map((group) => ({
-        key: group.id,
+      // defaultActiveKey={collapseDefaultOpen}
+      ghost
+      className="mt-4 bg-transparent [&_.ant-collapse-content-box]:!px-0 [&_.ant-collapse-content-box]:!pb-0 [&_.ant-collapse-header]:!px-0 [&_.ant-collapse-header]:!py-3 [&_.ant-collapse-header]:text-[13px] [&_.ant-collapse-header]:font-semibold [&_.ant-collapse-header]:text-slate-800"
+      items={groups.map((group, index: number) => ({
+        key: `${group.id}-${index}`,
         label: (
-          <span className="skills-group-label">
+          <span className="inline-flex items-center gap-2">
             {group.label}
-            <span className="skills-group-count">{group.skills.length}</span>
+            <span className="text-xs font-medium text-slate-500">{group.skills.length}</span>
           </span>
         ),
         children: (
-          <div className="skills-grid">
+          <div className="flex flex-col gap-3 py-1">
             {group.skills.map((skill) => {
               const skillKey = getSkillKey(skill);
 

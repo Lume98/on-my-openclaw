@@ -42,10 +42,13 @@ export function SkillsToolbar({
             placeholder="搜索技能"
             value={filter}
             onChange={(e) => onFilterChange(e.target.value)}
+            type="search"
+            autoComplete="off"
+            name="skills-filter"
             allowClear
           />
         </label>
-        <Text type="secondary" className="shrink-0 text-[13px]">
+        <Text type="secondary" className="shrink-0 text-[13px] flex items-center">
           已显示 {count} 项
         </Text>
       </div>

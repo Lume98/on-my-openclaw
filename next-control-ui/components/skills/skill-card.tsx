@@ -142,6 +142,8 @@ export const SkillCard = memo(function SkillCard({
               size="small"
               value={editingKey}
               onChange={(e) => onEditKey(skill, e.target.value)}
+              autoComplete="new-password"
+              name={`${key}-api-key`}
               placeholder={skill.primaryEnv}
             />
             <Button

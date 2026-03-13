@@ -147,7 +147,7 @@ export default function SkillsPage() {
       <SkillsToolbar
         connected={connected}
         count={filtered.length}
-        filter={""}
+        filter={filter}
         loading={skillsQuery.loading}
         onFilterChange={setFilter}
         onRefresh={handleRefresh}

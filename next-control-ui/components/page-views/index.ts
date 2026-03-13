@@ -25,3 +25,4 @@ export { NodesPanel } from "@/components/page-views/nodes-panel";
 export { ConfigPanel } from "@/components/page-views/config-panel";
 export { DebugPanel } from "@/components/page-views/debug-panel";
 export { LogsPanel } from "@/components/page-views/logs-panel";
+export { CronPanel } from "@/components/page-views/cron-panel";

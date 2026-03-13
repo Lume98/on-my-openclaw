@@ -1,6 +1,6 @@
 "use client";
 
-import { ChatPanel } from "@/components/views/chat-panel";
+import { ChatPanel } from "@/components/page-views";
 
 export type OpenClawAppProps = Record<string, never>;
 

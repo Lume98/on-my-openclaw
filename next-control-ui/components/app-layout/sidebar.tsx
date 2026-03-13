@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, type CSSProperties } from "react";
 import { Icon } from "@/components/icons";
-import { getTabByPath, tabGroups, tabs, type TabGroupKey } from "@/components/navigation";
+import { getTabByPath, tabGroups, tabs, type TabGroupKey } from "@/config/navigation";
 
 const { Sider } = Layout;
 

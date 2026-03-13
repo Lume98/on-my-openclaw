@@ -6,7 +6,7 @@ import type { CSSProperties } from "react";
 import { HeaderActions } from "@/components/app-layout/header-actions";
 import { HEADER_ACTIONS } from "@/components/app-layout/header-constants";
 import { StatusBadges } from "@/components/app-layout/status-badges";
-import type { TabDefinition } from "@/components/navigation";
+import type { TabDefinition } from "@/config/navigation";
 
 const { Header } = Layout;
 const { useBreakpoint } = Grid;

@@ -1,4 +1,4 @@
-import { OverviewPanel } from "@/components/views";
+import { OverviewPanel } from "@/components/page-views";
 
 export default function OverviewPage() {
   return <OverviewPanel />;

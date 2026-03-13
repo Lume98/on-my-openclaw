@@ -10,10 +10,10 @@ import {
   useState,
   type PropsWithChildren,
 } from "react";
-import { readConnectErrorDetailCode } from "@/components/connect-error-details";
-import { GatewayBrowserClient } from "@/components/gateway";
 import { useSettings } from "@/components/providers/settings-provider";
-import type { GatewayEventFrame, GatewayHelloOk, PresenceEntry } from "@/components/types";
+import { readConnectErrorDetailCode } from "@/lib/connect-error-details";
+import { GatewayBrowserClient } from "@/lib/gateway";
+import type { GatewayEventFrame, GatewayHelloOk, PresenceEntry } from "@/lib/types";
 
 type GatewayEventListener = (event: GatewayEventFrame) => void;
 

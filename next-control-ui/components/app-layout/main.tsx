@@ -2,8 +2,8 @@
 
 import { Breadcrumb, Layout, Tag, theme } from "antd";
 import { useMemo, type CSSProperties, type ReactNode } from "react";
-import type { TabDefinition } from "@/components/navigation";
-import { tabGroups } from "@/components/navigation";
+import type { TabDefinition } from "@/config/navigation";
+import { tabGroups } from "@/config/navigation";
 
 const { Content } = Layout;
 

@@ -2,7 +2,7 @@
 
 import { Button, Grid, Typography } from "antd";
 import { Icon } from "@/components/icons";
-import type { TabDefinition } from "@/components/navigation";
+import type { TabDefinition } from "@/config/navigation";
 
 const { useBreakpoint } = Grid;
 const { Text, Title } = Typography;

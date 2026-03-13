@@ -17,10 +17,11 @@ alwaysApply: true
 ```typescript
 // ✅ 正确
 import { OpenClawApp } from '@/components/open-claw-app';
-import type { TabKey } from '@/components/types';
+import type { TabKey } from '@/config/navigation';
+import type { UiSettings } from '@/lib/types';
 import { useGateway } from '@/components/hooks/use-gateway';
 
 // ❌ 错误
 import { OpenClawApp } from './open-claw-app';
-import type { TabKey } from '../types';
+import type { TabKey } from '../config/navigation';
 ```

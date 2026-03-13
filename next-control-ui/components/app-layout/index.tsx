@@ -9,9 +9,9 @@ import { AppHeader } from "@/components/app-layout/header";
 import { Main } from "@/components/app-layout/main";
 import { MobileDrawer } from "@/components/app-layout/mobile-drawer";
 import { Sidebar } from "@/components/app-layout/sidebar";
-import { getTabByPath } from "@/components/navigation";
 import { useGateway } from "@/components/providers/gateway-provider";
 import { useSettings } from "@/components/providers/settings-provider";
+import { getTabByPath } from "@/config/navigation";
 
 type AppLayoutProps = {
   children: React.ReactNode;

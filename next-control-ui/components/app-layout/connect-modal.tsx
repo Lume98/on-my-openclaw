@@ -1,7 +1,7 @@
 "use client";
 
 import { Input, Modal, Select, Space, Typography } from "antd";
-import type { UiSettings } from "@/components/types";
+import type { UiSettings } from "@/lib/types";
 
 type ConnectModalProps = {
   open: boolean;

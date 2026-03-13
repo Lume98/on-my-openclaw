@@ -10,7 +10,7 @@ import {
   useState,
   type PropsWithChildren,
 } from "react";
-import type { ThemeMode, UiSettings } from "@/components/types";
+import type { ThemeMode, UiSettings } from "@/lib/types";
 
 const settingsStorageKey = "openclaw.next-control.settings.v1";
 const legacyTokenSessionKey = "openclaw.control.token.v1";
